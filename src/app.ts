@@ -1,31 +1,29 @@
+import express, { Express, Request, Response } from 'express'
 
-import express, { Express, Request, Response } from "express";
+import Fighter from './model/fighterModel'
+import { runParsers } from './utils/parsersUFC'
+import { INTERVAL_DURATION } from './config'
+import { getAllFighters } from './controller/fighterController'
+import fighterRouter from './routes/fighterRoutes'
+const app: Express = express()
 
-import { runParsers } from "./utils/parsers";
-import Fighter from "./model/fighterModel";
-import Event from "./model/eventModel";
-import { UFC_NAMES_URL, UFC_EVENTS_URL, INTERVAL_DURATION } from "./config";
+//run parsers and write data to database
 
+;(async () => {
+    await runParsers()
 
-const app: Express = express();
+    setInterval(async () => {
+        await Fighter.deleteMany({})
+        await runParsers()
+    }, INTERVAL_DURATION)
+})()
 
-// run parsers and write data to database
- (async ()=>{
-  await runParsers(UFC_NAMES_URL, UFC_EVENTS_URL)
-  
-  setInterval(async()=>{
-    await Event.deleteMany({})
-    await Fighter.deleteMany({})
-    await runParsers(UFC_NAMES_URL, UFC_EVENTS_URL)
-  }
-    , INTERVAL_DURATION) 
-})();
+app.use('/api', fighterRouter)
 
+app.get('/fighters', getAllFighters)
 
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("response");
-});
-
+app.get('/', (req: Request, res: Response) => {
+    res.send('response')
+})
 
 export default app

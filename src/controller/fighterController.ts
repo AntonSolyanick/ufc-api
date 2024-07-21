@@ -1,8 +1,18 @@
-import { Model } from 'mongoose'
-import { fighterDocument } from '../model/fighterModel'
+import { Request, Response, NextFunction } from 'express'
 
-export const getAllFighters = async (Model: Model<fighterDocument>) => {
-    const fighters = await Model.find()
+import Fighter from '../model/fighterModel'
 
-    return fighters
+export const getAllFighters = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const fighters = await Fighter.find()
+    res.status(200).json({
+        status: 'success',
+        result: fighters.length,
+        body: {
+            data: fighters,
+        },
+    })
 }
