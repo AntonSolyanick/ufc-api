@@ -7,12 +7,16 @@ export const getAllFighters = async (
     res: Response,
     next: NextFunction
 ) => {
-    const fighters = await Fighter.find()
-    res.status(200).json({
-        status: 'success',
-        result: fighters.length,
-        body: {
-            data: fighters,
-        },
-    })
+    try {
+        const fighters = await Fighter.find()
+        res.status(200).json({
+            status: 'success',
+            result: fighters.length,
+            body: {
+                data: fighters,
+            },
+        })
+    } catch (err) {
+        res.send('"Get allfighters" error')
+    }
 }

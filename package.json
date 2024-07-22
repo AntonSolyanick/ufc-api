@@ -5,8 +5,9 @@
     "main": "src/server.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "tsc src/server.ts",
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon ./dist/server.js\""
+        "build": "npx tsc",
+        "dev": "concurrently \"npx tsc --watch\" \"nodemon ./src/server.ts\"",
+        "vercel-build": "echo hello"
     },
     "author": "Anton Solyanick",
     "license": "ISC",
