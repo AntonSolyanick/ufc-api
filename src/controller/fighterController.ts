@@ -17,6 +17,6 @@ export const getAllFighters = async (
             },
         })
     } catch (err) {
-        res.send('"Get allfighters" error')
+        res.send('Get allfighters error')
     }
 }
