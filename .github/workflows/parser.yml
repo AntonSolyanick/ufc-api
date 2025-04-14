@@ -22,6 +22,8 @@ jobs:
 
             # Ставим зависимости и запускаем парсер
             - name: Run Parser
+              env:
+                  DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
                   npx ts-node src/server.ts
