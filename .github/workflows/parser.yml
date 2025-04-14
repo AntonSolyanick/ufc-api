@@ -1,0 +1,27 @@
+name: UFC Parser
+on:
+    schedule:
+        - cron: '0 0 * * 0' # Каждое воскресенье в 00:00 UTC
+    workflow_dispatch: # Ручной запуск (опционально)
+
+jobs:
+    run-parser:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4 # Клонируем репозиторий
+            - uses: actions/setup-node@v4 # Устанавливаем Node.js
+              with:
+                  node-version: '20' # Или ваша версия
+
+            # Устанавливаем Chromium (кэшируется между запусками)
+            - name: Install Chromium
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y chromium
+                  echo "CHROME_PATH=/usr/bin/chromium" >> $GITHUB_ENV  # Путь для Puppeteer
+
+            # Ставим зависимости и запускаем парсер
+            - name: Run Parser
+              run: |
+                  npm install
+                  npx ts-node src/app.ts

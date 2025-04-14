@@ -21,9 +21,9 @@ const app: Express = express()
     }
 })()
 
-app.use('/api', fighterRouter)
-app.get('/', (req: Request, res: Response) => {
-    res.send('test response')
-})
+// app.use('/api', fighterRouter)
+// app.get('/', (req: Request, res: Response) => {
+//     res.send('test response')
+// })
 
 export default app
