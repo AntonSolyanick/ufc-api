@@ -9,7 +9,7 @@ export const getBrowserPage: any = async (url: string) => {
     const browser = await puppeteer.launch({
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium', // Путь в GitHub Actions
         args: ['--no-sandbox', '--disable-setuid-sandbox'], // Обход ограничений
-        headless: false, // Обязательно true!
+        headless: true, // Обязательно true!
     })
     const page = await browser.newPage()
     page.setDefaultNavigationTimeout(0)
