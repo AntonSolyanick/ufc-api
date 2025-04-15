@@ -32,9 +32,9 @@ jobs:
 
             # Ставим зависимости и запускаем парсер
             - name: Run Parser
-              working-directory: ./src/utils
+              # working-directory: ./src/utils
               env:
                   DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
-                  npx ts-node parsersUfC.ts
+                  npx ts-node src/server.ts
