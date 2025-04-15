@@ -2,7 +2,9 @@ name: UFC Parser
 on:
     schedule:
         - cron: '*/3 * * * *' # Запуск каждый день в 03:00 по МСК '0 1 * * *'
-
+    push:
+        branches:
+            - main # Срабатывает при push в main
     workflow_dispatch: # Ручной запуск (опционально)
 
 jobs:
@@ -30,9 +32,9 @@ jobs:
 
             # Ставим зависимости и запускаем парсер
             - name: Run Parser
+              working-directory: ./src/utils
               env:
                   DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
-                  working-directory: ./src/utils  
                   npx ts-node parsersUfC.ts
