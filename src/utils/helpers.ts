@@ -25,3 +25,7 @@ export function connectDB() {
         .connect(DB)
         .then((connection) => console.log('you are connected to the DB'))
 }
+
+export async function disconnectDB() {
+    await mongoose.disconnect()
+}

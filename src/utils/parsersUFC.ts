@@ -2,9 +2,8 @@ import { Model } from 'mongoose'
 
 import { UFC_NAMES_URL, UFC_EVENT_URL } from '../config'
 import Fighter from '../model/fighterModel'
-import { getBrowserPage } from './helpers'
 import { FighterDocument } from '../model/fighterModel'
-import { connectDB } from '../utils/helpers'
+import { disconnectDB, getBrowserPage, connectDB } from '../utils/helpers'
 
 export const namesParserUFC: Function = async () => {
     try {
@@ -138,11 +137,12 @@ export const runParsers = async () => {
         setTimeout(async () => {
             await populateCollection(Fighter, eventParserUfc)
             console.log('parsing compleated')
+            disconnectDB()
+            process.exit()
         }, 3000)
     } catch (err) {
         console.error(err)
-    } finally {
-    }
+        process.exit(1)
 }
 
 connectDB()
