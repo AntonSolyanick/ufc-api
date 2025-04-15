@@ -4,6 +4,7 @@ import { UFC_NAMES_URL, UFC_EVENT_URL } from '../config'
 import Fighter from '../model/fighterModel'
 import { getBrowserPage } from './helpers'
 import { FighterDocument } from '../model/fighterModel'
+import { connectDB } from './helpers'
 
 export const namesParserUFC: Function = async () => {
     try {
@@ -131,11 +132,18 @@ const populateCollection: Function = async (
 
 export const runParsers = async () => {
     try {
+        await Fighter.deleteMany({})
+        console.log('start parsing')
         await namesParserUFC()
-        setTimeout(() => {
-            populateCollection(Fighter, eventParserUfc)
+        setTimeout(async () => {
+            await populateCollection(Fighter, eventParserUfc)
+            console.log('parsing compleated')
         }, 3000)
     } catch (err) {
         console.error(err)
+    } finally {
     }
 }
+
+connectDB()
+runParsers()

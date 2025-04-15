@@ -1,7 +1,7 @@
-import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
 import app from './app'
+import { connectDB } from './utils/helpers'
 
 process.on('uncaughtException', (err: NodeJS.ErrnoException) => {
     console.log(err.name, err.message)
@@ -11,11 +11,8 @@ process.on('uncaughtException', (err: NodeJS.ErrnoException) => {
 
 dotenv.config()
 const port = process.env.PORT || 3000
-const DB = process.env.DATABASE!
 
-mongoose
-    .connect(DB)
-    .then((connection) => console.log('you are connected to the DB'))
+connectDB()
 
 const server = app.listen(port, () => {
     console.log(`Server is running on port:${port}`)
