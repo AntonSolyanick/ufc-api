@@ -37,4 +37,4 @@ jobs:
                   DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
-                  npx ts-node src/server.ts
+                  npx ts-node src/utils/parsersUFC.ts
