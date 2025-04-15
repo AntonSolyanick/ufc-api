@@ -4,7 +4,7 @@ import { UFC_NAMES_URL, UFC_EVENT_URL } from '../config'
 import Fighter from '../model/fighterModel'
 import { getBrowserPage } from './helpers'
 import { FighterDocument } from '../model/fighterModel'
-import { connectDB } from './helpers'
+import { connectDB } from '../utils/helpers'
 
 export const namesParserUFC: Function = async () => {
     try {

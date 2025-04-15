@@ -23,11 +23,18 @@ jobs:
                   sudo apt-get install -y chromium
                   echo "CHROME_PATH=/usr/bin/chromium" >> $GITHUB_ENV  # Путь для Puppeteer
 
+            - name: Verify project structure
+              run: |
+                  echo "Содержимое src/utils:"
+                  ls -la src/utils/
+                  echo "Поиск файла парсера:"
+                  find . -name "parsersUfC.ts"
+
             # Ставим зависимости и запускаем парсер
             - name: Run Parser
               env:
                   DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
-                  cd src/utils  
+                  working-directory: ./src/utils  
                   npx ts-node parsersUfC.ts
