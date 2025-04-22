@@ -1,5 +1,5 @@
-export const UFC_NAMES_URL = `https://www.itnwwe.com/mma/ufc-fighters-roster`
+export const UFC_URL = 'https://www.ufc.com'
 export const UFC_EVENT_URL = 'https://www.ufc.com/athlete/'
-
-// 8.64 * 10^7 = 1 day
-export const INTERVAL_DURATION = 8.64 * 10 ** 7 * 7
+export const UFC_URL_PARAMS = '/athletes/all?filters%5B0%5D=status%3A23'
+export const NO_PHOTO_FIGHTER =
+    'https://www.ufc.com/themes/custom/ufc/assets/img/no-profile-image.png'

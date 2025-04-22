@@ -8,12 +8,20 @@ type NextFightInfo = {
     firstFighterSmallImg: string
     secondFighterSmallImg: string
 }
+export type FighterRecord = {
+    wins?: number
+    draws?: number
+    loses?: number
+}
 
 export interface FighterDocument extends mongoose.Document {
     name: string
     fighterRusName: string
     fighterImage: string
     slug: string
+    fighterRating: number
+    fighterWeightCategory: string
+    fighterRecord: FighterRecord
     nextFightInfo: NextFightInfo
 }
 
@@ -34,7 +42,15 @@ const fighterSchema = new mongoose.Schema({
     fighterImage: {
         type: String,
     },
-
+    fighterRating: {
+        type: Number,
+    },
+    fighterWeightCategory: {
+        type: String,
+    },
+    fighterRecord: {
+        type: Object,
+    },
     nextFightInfo: {
         type: Object,
     },
