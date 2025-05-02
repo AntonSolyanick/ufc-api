@@ -193,16 +193,16 @@ const populateCollection: Function = async (
 ) => {
     try {
         await Model.deleteMany({})
-        const totalInfo = []
+        const totalFightersData = []
         for (let i = 0; i < fighters.length; i++) {
             const additionalIfo = await parser(`${fighters[i].slug}`)
-            totalInfo.push({ ...fighters[i], ...additionalIfo })
+            totalFightersData.push({ ...fighters[i], ...additionalIfo })
         }
 
-        const topRatingFighters = totalInfo
+        const topRatingFighters = totalFightersData
             .filter((fighter) => fighter.fighterRating)
             .sort((a, b) => a.fighterRating - b.fighterRating)
-        const lowRatingFighters = totalInfo.filter(
+        const lowRatingFighters = totalFightersData.filter(
             (fighter) => !fighter.fighterRating
         )
 

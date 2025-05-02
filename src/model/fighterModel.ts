@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import slugify from 'slugify'
 
 type NextFightInfo = {
     firstFighterName: string
@@ -56,10 +55,10 @@ const fighterSchema = new mongoose.Schema({
     },
 })
 
-fighterSchema.pre('save', function (next) {
-    this.slug = slugify(this.name, { lower: true })
-    next()
-})
+// fighterSchema.pre('save', function (next) {
+//     this.slug = slugify(this.name, { lower: true })
+//     next()
+// })
 
 const Fighter = mongoose.model<FighterDocument>('Fighter', fighterSchema)
 

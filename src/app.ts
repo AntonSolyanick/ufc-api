@@ -1,13 +1,15 @@
-import express, { Express, Request, Response } from 'express'
+import express, { Request, Response } from 'express'
+import cookieParser from 'cookie-parser'
 
-import Fighter from './model/fighterModel'
 import fighterRouter from './routes/fighterRoutes'
+import userRouter from './routes/userRoutes'
 
-const app: Express = express()
+const app = express()
+
+app.use(express.json())
+app.use(cookieParser())
 
 app.use('/api', fighterRouter)
-app.get('/', (req: Request, res: Response) => {
-    res.send('test response')
-})
+app.use('/api/users', userRouter)
 
 export default app
