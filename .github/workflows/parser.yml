@@ -1,7 +1,7 @@
 name: UFC Parser
 on:
     schedule:
-        - cron: '0 1 * * *' # Запуск каждый день в 03:00 по МСК
+        - cron: '0 23 * * *' # Запуск каждый день в 03:00 по МСК
     push:
         branches:
             - main # Срабатывает при push в main
@@ -11,17 +11,16 @@ jobs:
     run-parser:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4 # Клонируем репозиторий
-            - uses: actions/setup-node@v4 # Устанавливаем Node.js
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
-                  node-version: '20' # Или ваша версия
+                  node-version: '20'
 
-            # Устанавливаем Chromium (кэшируется между запусками)
             - name: Install Chromium
               run: |
                   sudo apt-get update
                   sudo apt-get install -y chromium
-                  echo "CHROME_PATH=/usr/bin/chromium" >> $GITHUB_ENV  # Путь для Puppeteer
+                  echo "CHROME_PATH=/usr/bin/chromium" >> $GITHUB_ENV
 
             - name: Verify project structure
               run: |
@@ -30,11 +29,28 @@ jobs:
                   echo "Поиск файла парсера:"
                   find . -name "parsersUfC.ts"
 
-            # Ставим зависимости и запускаем парсер
-            - name: Run Parser
-              # working-directory: ./src/utils
+            - name: Run Parser with Retry
               env:
                   DATABASE: ${{ secrets.DATABASE }}
               run: |
                   npm install
-                  npx ts-node src/utils/parsersUFC.ts
+                  MAX_RETRIES=5  # Максимум 5 попыток (можно изменить)
+                  ATTEMPT=1
+                  SUCCESS=false
+
+                  while [ $ATTEMPT -le $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
+                      echo "Попытка $ATTEMPT из $MAX_RETRIES..."
+                      if npx ts-node src/utils/parsersUFC.ts; then
+                          echo "✅ Парсер успешно завершен!"
+                          SUCCESS=true
+                      else
+                          echo "❌ Ошибка в попытке $ATTEMPT. Ждем 10 секунд перед повторным запуском..."
+                          sleep 10
+                          ((ATTEMPT++))
+                      fi
+                  done
+
+                  if [ "$SUCCESS" = false ]; then
+                      echo "🚨 Все попытки завершились ошибкой!"
+                      exit 1
+                  fi
