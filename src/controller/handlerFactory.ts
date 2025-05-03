@@ -33,3 +33,31 @@ export const getOne = <T extends mongoose.Document>(
             data: { document },
         })
     })
+
+export const mutateArray = <T extends mongoose.Document>(
+    actionType: string,
+    Model: Model<T>,
+    arrayName: any
+) =>
+    catchAsync(async (req, res, next) => {
+        let updateOperator: any
+        if (actionType === 'delete') updateOperator = '$pull'
+        if (actionType === 'add') updateOperator = '$addToSet'
+
+        const updatedDocument = await Model.findByIdAndUpdate(
+            req.params.id,
+            {
+                [updateOperator]: { [arrayName]: req.body.element },
+            },
+            { new: true, runValidators: true }
+        )
+
+        if (!updatedDocument) {
+            throw new Error("Can't find document with this ID")
+        }
+
+        res.status(200).json({
+            status: 'success',
+            data: { updatedDocument },
+        })
+    })

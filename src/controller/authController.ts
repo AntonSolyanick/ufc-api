@@ -56,6 +56,7 @@ const createSendToken = (
 
     res.cookie('jwt', token, cookieOptions)
     user.password = ''
+    user.confirmPassword = ''
 
     const response: ApiResponse = {
         status: 'success',
@@ -81,7 +82,7 @@ export const signIn = catchAsync(async (req, res, next) => {
     if (!email || !password)
         throw new Error('Please provide email and password!')
     const user = await User.findOne({ email }).select('+password')
-    if (!user || !(await user.correctPassword(password, user.password))) {
+    if (!user || !(await user.correctPassword(password, user.password!))) {
         throw new Error('Wrong email or password!')
     }
     createSendToken(user, 200, res)

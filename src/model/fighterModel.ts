@@ -55,11 +55,6 @@ const fighterSchema = new mongoose.Schema({
     },
 })
 
-// fighterSchema.pre('save', function (next) {
-//     this.slug = slugify(this.name, { lower: true })
-//     next()
-// })
-
 const Fighter = mongoose.model<FighterDocument>('Fighter', fighterSchema)
 
 export default Fighter

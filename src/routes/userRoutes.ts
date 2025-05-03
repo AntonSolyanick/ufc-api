@@ -11,5 +11,15 @@ userRouter.route('/signout').get(authController.signOut)
 userRouter.use(authController.protect)
 
 userRouter.get('/me', userController.getMe, userController.getUser)
+userRouter.post(
+    '/me/add-fighter',
+    userController.getMe,
+    userController.addFavouriteFighter
+)
+userRouter.post(
+    '/me/delete-fighter',
+    userController.getMe,
+    userController.deleteFavouriteFighter
+)
 
 export default userRouter

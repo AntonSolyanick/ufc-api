@@ -10,7 +10,18 @@ export const getMe: RequestHandler = (req: Request, res, next) => {
     if (!req.user) {
         return next(new Error('User not authenticated'))
     }
-
     req.params.id = req.user._id.toString()
     next()
 }
+
+export const addFavouriteFighter = factory.mutateArray(
+    'add',
+    User,
+    'favouriteFighters'
+)
+
+export const deleteFavouriteFighter = factory.mutateArray(
+    'delete',
+    User,
+    'favouriteFighters'
+)

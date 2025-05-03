@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "npx tsc",
-        "dev": "concurrently \"npx tsc --watch --preserveWatchOutput\" \"nodemon -r dotenv/config --watch src dist/server.js\"",
+        "dev": "concurrently \"tsc -w\" \"nodemon --delay 2.5 -r dotenv/config dist/server.js\"",
         "vercel-build": "echo hello"
     },
     "author": "Anton Solyanick",
