@@ -9,16 +9,7 @@
         "server.ts": {
             "runtime": "nodejs18.x",
             "memory": 1024,
-            "maxDuration": 30,
-            "includeFiles": [
-                "src/**/*.ts",
-                "models/**/*.ts",
-                "routes/**/*.ts",
-                "config/**/*.ts",
-                "package.json",
-                "tsconfig.json",
-                ".env.local"
-            ]
+            "maxDuration": 30
         }
     },
     "routes": [
@@ -32,11 +23,5 @@
             "dest": "/server.ts"
         }
     ],
-    "regions": ["fra1"],
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/server.ts"
-        }
-    ]
+    "regions": ["fra1"]
 }
