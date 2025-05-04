@@ -1,26 +1,36 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "server.ts",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": [
-                    "src/**/*.ts",
-                    "models/**/*.ts",
-                    "routes/**/*.ts",
-                    "package.json",
-                    "tsconfig.json",
-                    ".env"
-                ]
-            }
+    "version": 3,
+    "build": {
+        "env": {
+            "NODE_ENV": "production"
         }
-    ],
+    },
+    "functions": {
+        "server.ts": {
+            "runtime": "nodejs18.x",
+            "handler": "server.ts",
+            "memory": 1024,
+            "maxDuration": 30,
+            "includeFiles": [
+                "src/**/*.ts",
+                "models/**/*.ts",
+                "routes/**/*.ts",
+                "config/**/*.ts",
+                "package.json",
+                "tsconfig.json"
+            ]
+        }
+    },
     "routes": [
         {
-            "src": "/(.*)",
+            "src": "/api/(.*)",
             "dest": "server.ts",
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+        },
+        {
+            "src": "/(.*)",
+            "dest": "server.ts"
         }
-    ]
+    ],
+    "regions": ["fra1"]
 }

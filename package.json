@@ -7,7 +7,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc && copyfiles src/**/*.pug dist",
         "dev": "concurrently -k \"tsc -w\" \"nodemon --delay 2 -r dotenv/config dist/server.js\"",
-        "vercel-build": "echo hello"
+        "vercel-build": "tsc && vercel-build"
     },
     "author": "Anton Solyanick",
     "license": "ISC",
