@@ -9,8 +9,12 @@ import compression from 'compression'
 
 import fighterRouter from './routes/fighterRoutes'
 import userRouter from './routes/userRoutes'
+import mongoose from 'mongoose'
+import { connectDB } from './utils/helpers'
 
 const app = express()
+
+app.set('trust proxy', 1) // для корректной работы прокси (Vercel)
 
 app.use(
     helmet({
@@ -51,9 +55,18 @@ app.use(
 )
 
 const limiter = rateLimit({
-    max: 100,
     windowMs: 60 * 60 * 1000,
-    message: 'Too many requests from one IP, please try later.',
+    max: 100,
+    message: 'Too many requests from this IP, please try later',
+    validate: {
+        trustProxy: false, // Явно отключаем доверие к прокси для rate-limit
+    },
+    keyGenerator: (req) => {
+        // Берем IP из последнего доверенного прокси (Vercel)
+        const forwarded: any = req.headers['x-forwarded-for']
+        const ip = forwarded ? forwarded.split(',')[0] : req.ip
+        return ip
+    },
 })
 
 app.use('/api', limiter)
@@ -87,6 +100,17 @@ app.use(
     })
 )
 app.use(compression())
+
+app.use('/', (req, res) => {
+    //connectDB() //для работы Mongo при деплое на Vercel
+    res.json({
+        status: 'success',
+        message: 'API работает',
+        dbStatus:
+            mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString(),
+    })
+})
 
 app.use('/api', fighterRouter)
 app.use('/api/users', userRouter)

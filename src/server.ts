@@ -15,6 +15,7 @@ const port = process.env.PORT || 3000
 connectDB()
 
 const server = app.listen(port, () => {
+    connectDB()
     console.log(`Server is running on port:${port}`)
 })
 

@@ -78,8 +78,8 @@ export const initializeBrowser = async (
 
 const DB = process.env.DATABASE!
 
-export function connectDB() {
-    mongoose
+export async function connectDB() {
+    await mongoose
         .connect(DB)
         .then((connection) => console.log('you are connected to the DB'))
 }

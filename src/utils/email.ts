@@ -29,10 +29,12 @@ export class Email {
     private newTransport(): Transporter {
         if (process.env.NODE_ENV === 'production') {
             return nodemailer.createTransport({
-                service: 'SendGrid',
+                host: 'smtp.sendgrid.net',
+                port: 587, // или 465 для SSL
+                secure: false, // true для 465 порта, false для других
                 auth: {
-                    user: process.env.SENDGRID_USERNAME as string,
-                    pass: process.env.SENDGRID_PASSWORD as string,
+                    user: 'apikey', // всегда 'apikey' для SendGrid
+                    pass: process.env.SENDGRID_API_KEY as string,
                 },
             })
         }
