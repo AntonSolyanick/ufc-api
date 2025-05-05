@@ -101,8 +101,10 @@ app.use(
 )
 app.use(compression())
 
+app.use('/api', fighterRouter)
+app.use('/api/users', userRouter)
+
 app.use('/', (req, res) => {
-    //connectDB() //для работы Mongo при деплое на Vercel
     res.json({
         status: 'success',
         message: 'API работает',
@@ -111,8 +113,5 @@ app.use('/', (req, res) => {
         timestamp: new Date().toISOString(),
     })
 })
-
-app.use('/api', fighterRouter)
-app.use('/api/users', userRouter)
 
 export default app
