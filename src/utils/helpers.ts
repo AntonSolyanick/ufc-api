@@ -62,6 +62,7 @@ export const initializeBrowser = async (
     options?: ParseOptions
 ) => {
     const config = {
+        ignoreHTTPSErrors: true,
         headless: true,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
         maxWaitTime: 60000,

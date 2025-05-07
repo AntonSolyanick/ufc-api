@@ -9,8 +9,7 @@ import compression from 'compression'
 
 import fighterRouter from './routes/fighterRoutes'
 import userRouter from './routes/userRoutes'
-import mongoose from 'mongoose'
-import { connectDB } from './utils/helpers'
+import { Request } from 'express'
 
 const app = express()
 
@@ -59,13 +58,19 @@ const limiter = rateLimit({
     max: 100,
     message: 'Too many requests from this IP, please try later',
     validate: {
-        trustProxy: false, // Явно отключаем доверие к прокси для rate-limit
+        trustProxy: false,
     },
-    keyGenerator: (req) => {
-        // Берем IP из последнего доверенного прокси (Vercel)
-        const forwarded: any = req.headers['x-forwarded-for']
-        const ip = forwarded ? forwarded.split(',')[0] : req.ip
-        return ip
+    keyGenerator: (req: Request): string => {
+        const forwarded = req.headers['x-forwarded-for']
+
+        if (typeof forwarded === 'string') {
+            return forwarded.split(',')[0].trim()
+        }
+        if (Array.isArray(forwarded)) {
+            return forwarded[0].trim()
+        }
+
+        return req.ip!
     },
 })
 
@@ -108,9 +113,6 @@ app.use('/', (req, res) => {
     res.json({
         status: 'success',
         message: 'API работает',
-        dbStatus:
-            mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString(),
     })
 })
 

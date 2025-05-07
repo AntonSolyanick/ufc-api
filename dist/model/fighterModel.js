@@ -8,7 +8,7 @@ const fighterSchema = new mongoose_1.default.Schema({
     name: {
         type: String,
         required: [true, 'a fighter must have a name'],
-        unique: false,
+        unique: true,
     },
     fighterRusName: {
         type: String,
@@ -17,6 +17,8 @@ const fighterSchema = new mongoose_1.default.Schema({
     },
     slug: {
         type: String,
+        unique: true,
+        required: true,
     },
     fighterImage: {
         type: String,

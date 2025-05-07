@@ -42,7 +42,7 @@ const mutateArray = (actionType, Model, arrayName) => (0, catchAsync_1.catchAsyn
         [updateOperator]: { [arrayName]: req.body.element },
     }, { new: true, runValidators: true });
     if (!updatedDocument) {
-        throw new Error("Can't find document with this ID");
+        throw new Error("Can't find document");
     }
     res.status(200).json({
         status: 'success',

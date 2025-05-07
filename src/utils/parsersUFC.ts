@@ -41,6 +41,8 @@ async function setEnglishLanguage(page: Page) {
 }
 
 const namesParser = async (options?: ParseOptions) => {
+    console.log('Names parsing')
+
     try {
         const { browser, page } = await initializeBrowser(UFC_URL)
         await scrollPageToBottom(page)
@@ -48,6 +50,8 @@ const namesParser = async (options?: ParseOptions) => {
 
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
         const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
+        // const targetUrl =
+        //     'https://ufc.ru/athletes/all?filters%5B0%5D=location%3ASF&filters%5B1%5D=location%3AWL&filters%5B2%5D=status%3A23'
         await page.goto(targetUrl, {
             waitUntil: 'networkidle2',
             timeout: 8000,
@@ -74,12 +78,16 @@ const namesParser = async (options?: ParseOptions) => {
         console.error('Something went wrong!', err)
     }
 }
-
+let i = 0
 const fighterDataParser: Function = async (fighterSlugName: string) => {
+    console.log('Fighter data parsing', i, fighterSlugName)
+    i++
     try {
+        if (!fighterSlugName) return
         const { browser, page } = await initializeBrowser(
             `${UFC_EVENT_URL}${fighterSlugName}`
         )
+        if (!page) return
 
         const parsedData = await page.evaluate((NO_PHOTO_FIGHTER) => {
             const nextFightContainer = document.querySelector(
@@ -191,8 +199,9 @@ const populateCollection: Function = async (
     parser: Function,
     Model: Model<mongoose.Document>
 ) => {
+    console.log(fighters[783], fighters[784])
+
     try {
-        await Model.deleteMany({})
         const totalFightersData = []
         for (let i = 0; i < fighters.length; i++) {
             const additionalIfo = await parser(`${fighters[i].slug}`)
@@ -206,7 +215,18 @@ const populateCollection: Function = async (
             (fighter) => !fighter.fighterRating
         )
 
-        await Model.insertMany([...topRatingFighters, ...lowRatingFighters])
+        const sortedFighters = [...topRatingFighters, ...lowRatingFighters]
+        console.log('Populating')
+
+        await Model.bulkWrite(
+            sortedFighters.map((fighter) => ({
+                updateOne: {
+                    filter: { name: fighter.name },
+                    update: { $set: fighter },
+                    upsert: true,
+                },
+            }))
+        )
     } catch (err) {
         console.log(err)
     }

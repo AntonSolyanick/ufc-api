@@ -13,7 +13,6 @@ const hpp_1 = __importDefault(require("hpp"));
 const compression_1 = __importDefault(require("compression"));
 const fighterRoutes_1 = __importDefault(require("./routes/fighterRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const app = (0, express_1.default)();
 app.set('trust proxy', 1); // для корректной работы прокси (Vercel)
 app.use((0, helmet_1.default)({
@@ -53,13 +52,17 @@ const limiter = (0, express_rate_limit_1.default)({
     max: 100,
     message: 'Too many requests from this IP, please try later',
     validate: {
-        trustProxy: false, // Явно отключаем доверие к прокси для rate-limit
+        trustProxy: false,
     },
     keyGenerator: (req) => {
-        // Берем IP из последнего доверенного прокси (Vercel)
         const forwarded = req.headers['x-forwarded-for'];
-        const ip = forwarded ? forwarded.split(',')[0] : req.ip;
-        return ip;
+        if (typeof forwarded === 'string') {
+            return forwarded.split(',')[0].trim();
+        }
+        if (Array.isArray(forwarded)) {
+            return forwarded[0].trim();
+        }
+        return req.ip;
     },
 });
 app.use('/api', limiter);
@@ -93,8 +96,6 @@ app.use('/', (req, res) => {
     res.json({
         status: 'success',
         message: 'API работает',
-        dbStatus: mongoose_1.default.connection.readyState === 1 ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString(),
     });
 });
 exports.default = app;

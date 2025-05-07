@@ -37,7 +37,7 @@ export const getOne = <T extends mongoose.Document>(
 export const mutateArray = <T extends mongoose.Document>(
     actionType: string,
     Model: Model<T>,
-    arrayName: any
+    arrayName: string
 ) =>
     catchAsync(async (req, res, next) => {
         let updateOperator: any
@@ -53,7 +53,7 @@ export const mutateArray = <T extends mongoose.Document>(
         )
 
         if (!updatedDocument) {
-            throw new Error("Can't find document with this ID")
+            throw new Error("Can't find document")
         }
 
         res.status(200).json({

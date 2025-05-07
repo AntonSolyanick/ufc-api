@@ -50,6 +50,7 @@ const scrollPageToBottom = async (page, scrollStep = 250, scrollDelay = 100) => 
 exports.scrollPageToBottom = scrollPageToBottom;
 const initializeBrowser = async (url, options) => {
     const config = {
+        ignoreHTTPSErrors: true,
         headless: true,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
         maxWaitTime: 60000,
