@@ -33,11 +33,12 @@ const namesParser = async (options) => {
     console.log('Names parsing');
     try {
         const { browser, page } = await (0, helpers_2.initializeBrowser)(config_1.UFC_URL);
+        if (!page)
+            return;
         await (0, helpers_2.scrollPageToBottom)(page);
         await setEnglishLanguage(page);
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
-        // const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
-        const targetUrl = 'https://ufc.ru/athletes/all?filters%5B0%5D=location%3ASF&filters%5B1%5D=location%3AWL&filters%5B2%5D=status%3A23';
+        const targetUrl = `${config_1.UFC_URL}${config_1.UFC_URL_PARAMS}`;
         await page.goto(targetUrl, {
             waitUntil: 'networkidle2',
             timeout: 8000,
@@ -59,12 +60,16 @@ const namesParser = async (options) => {
         console.error('Something went wrong!', err);
     }
 };
-let i = 0;
+let fighterNumber = 0;
 const fighterDataParser = async (fighterSlugName) => {
-    console.log('Fighter data parsing', i);
-    i++;
+    console.log('Fighter data parsing', fighterNumber, fighterSlugName);
+    fighterNumber++;
     try {
+        if (!fighterSlugName)
+            return;
         const { browser, page } = await (0, helpers_2.initializeBrowser)(`${config_1.UFC_EVENT_URL}${fighterSlugName}`);
+        if (!page)
+            return;
         const parsedData = await page.evaluate((NO_PHOTO_FIGHTER) => {
             const nextFightContainer = document.querySelector('.c-card-event--upcoming');
             const fighterImage = document
@@ -144,6 +149,7 @@ const fighterDataParser = async (fighterSlugName) => {
     }
 };
 const populateCollection = async (fighters, parser, Model) => {
+    console.log(fighters[783], fighters[784]);
     try {
         const totalFightersData = [];
         for (let i = 0; i < fighters.length; i++) {
@@ -155,7 +161,7 @@ const populateCollection = async (fighters, parser, Model) => {
             .sort((a, b) => a.fighterRating - b.fighterRating);
         const lowRatingFighters = totalFightersData.filter((fighter) => !fighter.fighterRating);
         const sortedFighters = [...topRatingFighters, ...lowRatingFighters];
-        console.log('Populating');
+        console.log('Populating mongo collection');
         await Model.bulkWrite(sortedFighters.map((fighter) => ({
             updateOne: {
                 filter: { name: fighter.name },

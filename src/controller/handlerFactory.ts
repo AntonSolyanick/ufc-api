@@ -1,6 +1,7 @@
 import mongoose, { Model, PopulateOptions } from 'mongoose'
 import { catchAsync } from '../utils/catchAsync'
 import { APIFeatures } from '../utils/APIFeatures'
+import { UserDocument } from '../model/userModel'
 
 export const getAll = <T extends mongoose.Document>(Model: Model<T>) =>
     catchAsync(async (req, res, next) => {
@@ -44,13 +45,13 @@ export const mutateArray = <T extends mongoose.Document>(
         if (actionType === 'delete') updateOperator = '$pull'
         if (actionType === 'add') updateOperator = '$addToSet'
 
-        const updatedDocument = await Model.findByIdAndUpdate(
+        const updatedDocument = (await Model.findByIdAndUpdate(
             req.params.id,
             {
                 [updateOperator]: { [arrayName]: req.body.element },
             },
             { new: true, runValidators: true }
-        )
+        )) as UserDocument
 
         if (!updatedDocument) {
             throw new Error("Can't find document")

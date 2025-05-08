@@ -2,7 +2,6 @@ import mongoose from 'mongoose'
 import validator from 'validator'
 import { Types } from 'mongoose'
 import bcrypt from 'bcryptjs'
-import { ObjectId } from 'mongodb'
 
 export interface UserDocument extends mongoose.Document {
     _id: Types.ObjectId
@@ -18,7 +17,7 @@ export interface UserDocument extends mongoose.Document {
         default: boolean
         select: boolean
     }
-    favouriteFighters: ObjectId[]
+    favouriteFighters: mongoose.Types.ObjectId[]
     correctPassword(password: string, userPassword: string): Promise<boolean>
 }
 

@@ -45,13 +45,12 @@ const namesParser = async (options?: ParseOptions) => {
 
     try {
         const { browser, page } = await initializeBrowser(UFC_URL)
+        if (!page) return
         await scrollPageToBottom(page)
         await setEnglishLanguage(page)
 
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
         const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
-        // const targetUrl =
-        //     'https://ufc.ru/athletes/all?filters%5B0%5D=location%3ASF&filters%5B1%5D=location%3AWL&filters%5B2%5D=status%3A23'
         await page.goto(targetUrl, {
             waitUntil: 'networkidle2',
             timeout: 8000,
@@ -71,17 +70,17 @@ const namesParser = async (options?: ParseOptions) => {
             return Array.from(uniqueNames)
         })
         browser.close()
-        return parsedNames.map((name) => {
+        return parsedNames.map((name: string) => {
             return { name, slug: slugify(name) }
         })
     } catch (err) {
         console.error('Something went wrong!', err)
     }
 }
-let i = 0
+let fighterNumber = 0
 const fighterDataParser: Function = async (fighterSlugName: string) => {
-    console.log('Fighter data parsing', i, fighterSlugName)
-    i++
+    console.log('Fighter data parsing', fighterNumber, fighterSlugName)
+    fighterNumber++
     try {
         if (!fighterSlugName) return
         const { browser, page } = await initializeBrowser(
@@ -89,7 +88,7 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
         )
         if (!page) return
 
-        const parsedData = await page.evaluate((NO_PHOTO_FIGHTER) => {
+        const parsedData = await page.evaluate((NO_PHOTO_FIGHTER: string) => {
             const nextFightContainer = document.querySelector(
                 '.c-card-event--upcoming'
             )
@@ -216,7 +215,7 @@ const populateCollection: Function = async (
         )
 
         const sortedFighters = [...topRatingFighters, ...lowRatingFighters]
-        console.log('Populating')
+        console.log('Populating mongo collection')
 
         await Model.bulkWrite(
             sortedFighters.map((fighter) => ({

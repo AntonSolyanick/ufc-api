@@ -59,7 +59,14 @@ const initializeBrowser = async (url, options) => {
     };
     const browser = await puppeteer_core_1.default.launch(config);
     const page = await browser.newPage();
-    page.goto(url);
+    try {
+        page.goto(url, { timeout: 120000 });
+    }
+    catch (error) {
+        console.error(`Сайт недоступен: ${url}`);
+        await browser.close();
+        return { browser: null, page: null };
+    }
     await page.waitForNavigation();
     return { browser, page };
 };

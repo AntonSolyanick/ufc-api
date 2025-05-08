@@ -38,9 +38,9 @@ const mutateArray = (actionType, Model, arrayName) => (0, catchAsync_1.catchAsyn
         updateOperator = '$pull';
     if (actionType === 'add')
         updateOperator = '$addToSet';
-    const updatedDocument = await Model.findByIdAndUpdate(req.params.id, {
+    const updatedDocument = (await Model.findByIdAndUpdate(req.params.id, {
         [updateOperator]: { [arrayName]: req.body.element },
-    }, { new: true, runValidators: true });
+    }, { new: true, runValidators: true }));
     if (!updatedDocument) {
         throw new Error("Can't find document");
     }
