@@ -16,7 +16,7 @@ const app = express()
 
 app.use(
     cors({
-        origin: ['http://localhost:3000'],
+        origin: ['https://ufc-events.netlify.app', 'http://localhost:3000'],
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -33,7 +33,7 @@ app.use(
                 scriptSrc: ["'self'", "'unsafe-eval'", "'wasm-unsafe-eval'"], // Для современных веб-приложений
                 styleSrc: ["'self'", "'unsafe-inline'"], // Разрешаем инлайновые стили
                 imgSrc: ["'self'", 'data:', 'blob:'],
-                connectSrc: ["'self'", 'https://api.yourdomain.com'],
+                connectSrc: ["'self'", 'https://ufc-api-7z3p.onrender.com'],
                 fontSrc: ["'self'"],
                 formAction: ["'self'"],
                 frameAncestors: ["'none'"], // Защита от clickjacking
