@@ -16,7 +16,7 @@ const fighterRoutes_1 = __importDefault(require("./routes/fighterRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: ['http://localhost:3000'],
+    origin: ['https://ufc-events.netlify.app', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -29,7 +29,7 @@ app.use((0, helmet_1.default)({
             scriptSrc: ["'self'", "'unsafe-eval'", "'wasm-unsafe-eval'"], // Для современных веб-приложений
             styleSrc: ["'self'", "'unsafe-inline'"], // Разрешаем инлайновые стили
             imgSrc: ["'self'", 'data:', 'blob:'],
-            connectSrc: ["'self'", 'https://api.yourdomain.com'],
+            connectSrc: ["'self'", 'https://ufc-events.netlify.app'],
             fontSrc: ["'self'"],
             formAction: ["'self'"],
             frameAncestors: ["'none'"], // Защита от clickjacking

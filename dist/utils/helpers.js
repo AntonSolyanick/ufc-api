@@ -3,13 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initializeBrowser = exports.scrollPageToBottom = exports.clickButton = exports.delay = void 0;
+exports.initializeBrowser = exports.scrollPageToBottom = exports.clickButton = exports.delay = exports.capitalizeFirstLetter = void 0;
 exports.connectDB = connectDB;
 exports.disconnectDB = disconnectDB;
 const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 dotenv_1.default.config();
+const capitalizeFirstLetter = (val) => {
+    return (String(val).charAt(0).toUpperCase() +
+        String(val).slice(1).toLocaleLowerCase());
+};
+exports.capitalizeFirstLetter = capitalizeFirstLetter;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 exports.delay = delay;
 const clickButton = async (page, selector) => {

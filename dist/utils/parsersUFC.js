@@ -7,7 +7,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const slugify_1 = __importDefault(require("slugify"));
 const fighterModel_1 = __importDefault(require("../model/fighterModel"));
 const helpers_1 = require("../utils/helpers");
-const helpers_2 = require("./helpers");
 const config_1 = require("../config");
 dotenv_1.default.config();
 async function setEnglishLanguage(page) {
@@ -17,8 +16,8 @@ async function setEnglishLanguage(page) {
         return;
     }
     try {
-        (0, helpers_2.clickButton)(page, '.block-ufc-localization-title');
-        (0, helpers_2.clickButton)(page, 'ul.links > li:first-child > a:first-child');
+        (0, helpers_1.clickButton)(page, '.block-ufc-localization-title');
+        (0, helpers_1.clickButton)(page, 'ul.links > li:first-child > a:first-child');
         await page.waitForNavigation({
             waitUntil: 'networkidle0',
             timeout: 15000,
@@ -31,11 +30,13 @@ async function setEnglishLanguage(page) {
 }
 const namesParser = async (options) => {
     console.log('Names parsing');
+    console.log(new Date().getTime());
+    console.log(new Date('21.06.25').getTime());
     try {
-        const { browser, page } = await (0, helpers_2.initializeBrowser)(config_1.UFC_URL);
+        const { browser, page } = await (0, helpers_1.initializeBrowser)(config_1.UFC_URL);
         if (!page)
             return;
-        await (0, helpers_2.scrollPageToBottom)(page);
+        await (0, helpers_1.scrollPageToBottom)(page);
         await setEnglishLanguage(page);
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
         const targetUrl = `${config_1.UFC_URL}${config_1.UFC_URL_PARAMS}`;
@@ -43,8 +44,8 @@ const namesParser = async (options) => {
             waitUntil: 'networkidle2',
             timeout: 8000,
         });
-        while (await (0, helpers_2.clickButton)(page, '[title="Load more items"]')) {
-            await (0, helpers_2.delay)(1000);
+        while (await (0, helpers_1.clickButton)(page, '[title="Load more items"]')) {
+            await (0, helpers_1.delay)(1000);
         }
         const parsedNames = await page.evaluate(() => {
             const names = Array.from(document.querySelectorAll('.c-listing-athlete__name'));
@@ -67,7 +68,7 @@ const fighterDataParser = async (fighterSlugName) => {
     try {
         if (!fighterSlugName)
             return;
-        const { browser, page } = await (0, helpers_2.initializeBrowser)(`${config_1.UFC_EVENT_URL}${fighterSlugName}`);
+        const { browser, page } = await (0, helpers_1.initializeBrowser)(`${config_1.UFC_EVENT_URL}${fighterSlugName}`);
         if (!page)
             return;
         const parsedData = await page.evaluate((NO_PHOTO_FIGHTER) => {
@@ -106,16 +107,8 @@ const fighterDataParser = async (fighterSlugName) => {
                     fighterRecord.draws = Math.abs(Number(recordStat));
             });
             const nextFightHeadline = nextFightContainer?.querySelector('.c-card-event--athlete-fight__headline');
-            // const firstFighterName =
-            //     nextFightHeadline?.innerText?.split('VS')[0]
-            // const secondFighterName =
-            //     nextFightHeadline?.innerText?.split('VS')[1]
-            function capitalizeFirstLetter(val) {
-                return (String(val).charAt(0).toUpperCase() +
-                    String(val).slice(1).toLocaleLowerCase());
-            }
-            let firstFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[0]);
-            let secondFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[1]);
+            let firstFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[0]);
+            let secondFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[1]);
             const fightersSmallImgs = nextFightContainer?.querySelectorAll('.image-style-event-results-athlete-headshot');
             let firstFighterSmallImg = NO_PHOTO_FIGHTER;
             let secondFighterSmallImg = NO_PHOTO_FIGHTER;

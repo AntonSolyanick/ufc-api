@@ -8,14 +8,13 @@ import {
     disconnectDB,
     connectDB,
     capitalizeFirstLetter,
-} from '../utils/helpers'
-import {
     initializeBrowser,
     ParseOptions,
     scrollPageToBottom,
     clickButton,
     delay,
-} from './helpers'
+} from '../utils/helpers'
+
 import {
     UFC_EVENT_URL,
     UFC_URL,

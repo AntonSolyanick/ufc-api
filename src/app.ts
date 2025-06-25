@@ -33,7 +33,7 @@ app.use(
                 scriptSrc: ["'self'", "'unsafe-eval'", "'wasm-unsafe-eval'"], // Для современных веб-приложений
                 styleSrc: ["'self'", "'unsafe-inline'"], // Разрешаем инлайновые стили
                 imgSrc: ["'self'", 'data:', 'blob:'],
-                connectSrc: ["'self'", 'https://ufc-api-7z3p.onrender.com'],
+                connectSrc: ["'self'", 'https://ufc-events.netlify.app'],
                 fontSrc: ["'self'"],
                 formAction: ["'self'"],
                 frameAncestors: ["'none'"], // Защита от clickjacking
