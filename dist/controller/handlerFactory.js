@@ -5,9 +5,11 @@ const catchAsync_1 = require("../utils/catchAsync");
 const APIFeatures_1 = require("../utils/APIFeatures");
 const getAll = (Model) => (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     let filter = {};
-    if (req.params.id)
-        filter = { id: req.params.id };
-    const features = new APIFeatures_1.APIFeatures(Model.find(), req.query).paginate();
+    if (req.params.fighterRusName)
+        filter = { fighterRusName: req.params.fighterRusName };
+    const features = new APIFeatures_1.APIFeatures(Model.find(filter), req.query)
+        .filter()
+        .paginate();
     const document = await features.query;
     res.status(200).json({
         status: 'success',
@@ -19,7 +21,7 @@ const getAll = (Model) => (0, catchAsync_1.catchAsync)(async (req, res, next) =>
 });
 exports.getAll = getAll;
 const getOne = (Model, popOptions) => (0, catchAsync_1.catchAsync)(async (req, res, next) => {
-    let query = Model.findById(req.params.id);
+    let query = Model.findById(req.params.userId);
     if (popOptions)
         query = query.populate(popOptions);
     const document = await query;
@@ -28,7 +30,7 @@ const getOne = (Model, popOptions) => (0, catchAsync_1.catchAsync)(async (req, r
     }
     res.status(200).json({
         status: 'success',
-        data: { document },
+        document,
     });
 });
 exports.getOne = getOne;
@@ -38,8 +40,8 @@ const mutateArray = (actionType, Model, arrayName) => (0, catchAsync_1.catchAsyn
         updateOperator = '$pull';
     if (actionType === 'add')
         updateOperator = '$addToSet';
-    const updatedDocument = (await Model.findByIdAndUpdate(req.params.id, {
-        [updateOperator]: { [arrayName]: req.body.element },
+    const updatedDocument = (await Model.findByIdAndUpdate(req.params.userId, {
+        [updateOperator]: { [arrayName]: req.body.itemId },
     }, { new: true, runValidators: true }));
     if (!updatedDocument) {
         throw new Error("Can't find document");

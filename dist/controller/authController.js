@@ -22,6 +22,9 @@ const createSendToken = (user, statusCode, res) => {
         httpOnly: true,
         expires: new Date(Date.now() +
             Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000),
+        sameSite: 'none',
+        secure: true,
+        path: '/',
     };
     if (process.env.NODE_ENV === 'production') {
         cookieOptions.secure = true;
@@ -32,9 +35,7 @@ const createSendToken = (user, statusCode, res) => {
     const response = {
         status: 'success',
         token,
-        data: {
-            user,
-        },
+        user,
     };
     res.status(statusCode).json(response);
 };
@@ -47,19 +48,18 @@ exports.signUp = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
 exports.signIn = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password)
-        throw new Error('Please provide email and password!');
+        throw new Error('Введите email и пароль!');
     const user = await userModel_1.default.findOne({ email }).select('+password');
     if (!user || !(await user.correctPassword(password, user.password))) {
-        throw new Error('Wrong email or password!');
+        throw new Error('Неверный email или пароль!');
     }
     createSendToken(user, 200, res);
 });
-exports.signOut = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
-    res.cookie('jwt', 'loggedout', {
-        expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true,
+exports.signOut = (0, catchAsync_1.catchAsync)(async (req, res) => {
+    res.clearCookie('jwt');
+    res.status(200).json({
+        status: 'success',
     });
-    res.status(200).json({ status: 'success' });
 });
 const isSignedIn = async (req, res, next) => {
     const token = req.cookies?.jwt;

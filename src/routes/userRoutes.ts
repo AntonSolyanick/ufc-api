@@ -16,7 +16,7 @@ userRouter.post(
     userController.getMe,
     userController.addFavouriteFighter
 )
-userRouter.post(
+userRouter.delete(
     '/me/delete-fighter',
     userController.getMe,
     userController.deleteFavouriteFighter

@@ -15,14 +15,14 @@ interface CookieOptions {
     httpOnly: boolean
     expires?: Date
     secure?: boolean
+    sameSite?: boolean | 'none' | 'lax' | 'strict' | undefined
+    path?: string
 }
 
 interface ApiResponse {
     status: 'success' | 'fail' | 'error'
     token?: string
-    data?: {
-        user: Partial<UserDocument>
-    }
+    user?: Partial<UserDocument>
 }
 
 const signInToken = (id: Types.ObjectId): string => {
@@ -48,6 +48,9 @@ const createSendToken = (
             Date.now() +
                 Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
         ),
+        sameSite: 'none',
+        secure: true,
+        path: '/',
     }
 
     if (process.env.NODE_ENV === 'production') {
@@ -61,9 +64,7 @@ const createSendToken = (
     const response: ApiResponse = {
         status: 'success',
         token,
-        data: {
-            user,
-        },
+        user,
     }
 
     res.status(statusCode).json(response)
@@ -79,21 +80,21 @@ export const signUp = catchAsync(async (req, res, next) => {
 export const signIn = catchAsync(async (req, res, next) => {
     const { email, password } = req.body
 
-    if (!email || !password)
-        throw new Error('Please provide email and password!')
+    if (!email || !password) throw new Error('Введите email и пароль!')
+
     const user = await User.findOne({ email }).select('+password')
     if (!user || !(await user.correctPassword(password, user.password!))) {
-        throw new Error('Wrong email or password!')
+        throw new Error('Неверный email или пароль!')
     }
+
     createSendToken(user, 200, res)
 })
 
-export const signOut = catchAsync(async (req, res, next) => {
-    res.cookie('jwt', 'loggedout', {
-        expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true,
+export const signOut = catchAsync(async (req: Request, res: Response) => {
+    res.clearCookie('jwt')
+    res.status(200).json({
+        status: 'success',
     })
-    res.status(200).json({ status: 'success' })
 })
 
 export const isSignedIn = async (

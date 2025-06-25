@@ -4,7 +4,11 @@ import dotenv from 'dotenv'
 import slugify from 'slugify'
 
 import Fighter, { FighterRecord } from '../model/fighterModel'
-import { disconnectDB, connectDB } from '../utils/helpers'
+import {
+    disconnectDB,
+    connectDB,
+    capitalizeFirstLetter,
+} from '../utils/helpers'
 import {
     initializeBrowser,
     ParseOptions,
@@ -42,6 +46,8 @@ async function setEnglishLanguage(page: Page) {
 
 const namesParser = async (options?: ParseOptions) => {
     console.log('Names parsing')
+    console.log(new Date().getTime())
+    console.log(new Date('21.06.25').getTime())
 
     try {
         const { browser, page } = await initializeBrowser(UFC_URL)
@@ -77,6 +83,7 @@ const namesParser = async (options?: ParseOptions) => {
         console.error('Something went wrong!', err)
     }
 }
+
 let fighterNumber = 0
 const fighterDataParser: Function = async (fighterSlugName: string) => {
     console.log('Fighter data parsing', fighterNumber, fighterSlugName)
@@ -131,9 +138,9 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                     if (i === 0)
                         fighterRecord.wins = Math.abs(Number(recordStat))
                     if (i === 1)
-                        fighterRecord.draws = Math.abs(Number(recordStat))
-                    if (i === 2)
                         fighterRecord.loses = Math.abs(Number(recordStat))
+                    if (i === 2)
+                        fighterRecord.draws = Math.abs(Number(recordStat))
                 })
 
             const nextFightHeadline: HTMLElement =
@@ -141,10 +148,13 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                     '.c-card-event--athlete-fight__headline'
                 )!
 
-            const firstFighterName =
+            let firstFighterName = capitalizeFirstLetter(
                 nextFightHeadline?.innerText?.split('VS')[0]
-            const secondFighterName =
+            )
+
+            let secondFighterName = capitalizeFirstLetter(
                 nextFightHeadline?.innerText?.split('VS')[1]
+            )
 
             const fightersSmallImgs = nextFightContainer?.querySelectorAll(
                 '.image-style-event-results-athlete-headshot'
@@ -158,9 +168,21 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                     fightersSmallImgs[1].getAttribute('src')!
             }
 
+            if (fighterRusName?.includes(secondFighterName)) {
+                ;[firstFighterName, secondFighterName] = [
+                    secondFighterName,
+                    firstFighterName,
+                ]
+                ;[firstFighterSmallImg, secondFighterSmallImg] = [
+                    secondFighterSmallImg,
+                    firstFighterSmallImg,
+                ]
+            }
+
             const fightDate = nextFightContainer?.querySelector(
                 '.c-card-event--athlete-fight__date'
             )?.textContent
+
             if (!fightDate) {
                 return {
                     fighterImage,
@@ -186,6 +208,7 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                 },
             }
         }, NO_PHOTO_FIGHTER)
+
         browser.close()
         return parsedData
     } catch (err) {
@@ -198,8 +221,6 @@ const populateCollection: Function = async (
     parser: Function,
     Model: Model<mongoose.Document>
 ) => {
-    console.log(fighters[783], fighters[784])
-
     try {
         const totalFightersData = []
         for (let i = 0; i < fighters.length; i++) {

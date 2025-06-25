@@ -10,7 +10,7 @@ export const getMe: RequestHandler = (req: Request, res, next) => {
     if (!req.user) {
         return next(new Error('User not authenticated'))
     }
-    req.params.id = req.user._id.toString()
+    req.params.userId = req.user._id.toString()
     next()
 }
 

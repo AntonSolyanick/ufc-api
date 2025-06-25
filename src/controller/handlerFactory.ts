@@ -6,8 +6,11 @@ import { UserDocument } from '../model/userModel'
 export const getAll = <T extends mongoose.Document>(Model: Model<T>) =>
     catchAsync(async (req, res, next) => {
         let filter = {}
-        if (req.params.id) filter = { id: req.params.id }
-        const features = new APIFeatures(Model.find(), req.query).paginate()
+        if (req.params.fighterRusName)
+            filter = { fighterRusName: req.params.fighterRusName }
+        const features = new APIFeatures(Model.find(filter), req.query)
+            .filter()
+            .paginate()
         const document = await features.query
         res.status(200).json({
             status: 'success',
@@ -23,7 +26,7 @@ export const getOne = <T extends mongoose.Document>(
     popOptions?: PopulateOptions
 ) =>
     catchAsync(async (req, res, next) => {
-        let query = Model.findById(req.params.id)
+        let query = Model.findById(req.params.userId)
         if (popOptions) query = query.populate(popOptions)
         const document = await query
         if (!document) {
@@ -31,7 +34,7 @@ export const getOne = <T extends mongoose.Document>(
         }
         res.status(200).json({
             status: 'success',
-            data: { document },
+            document,
         })
     })
 
@@ -46,9 +49,9 @@ export const mutateArray = <T extends mongoose.Document>(
         if (actionType === 'add') updateOperator = '$addToSet'
 
         const updatedDocument = (await Model.findByIdAndUpdate(
-            req.params.id,
+            req.params.userId,
             {
-                [updateOperator]: { [arrayName]: req.body.element },
+                [updateOperator]: { [arrayName]: req.body.itemId },
             },
             { new: true, runValidators: true }
         )) as UserDocument

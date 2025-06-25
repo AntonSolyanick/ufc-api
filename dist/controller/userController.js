@@ -45,7 +45,7 @@ const getMe = (req, res, next) => {
     if (!req.user) {
         return next(new Error('User not authenticated'));
     }
-    req.params.id = req.user._id.toString();
+    req.params.userId = req.user._id.toString();
     next();
 };
 exports.getMe = getMe;

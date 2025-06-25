@@ -1,15 +1,26 @@
-name: Keep Render App Alive
+name: Keep Render REST API Alive
 
 on:
     schedule:
-        - cron: '*/12 * * * *' # Runs every 10 minutes
-    workflow_dispatch: # Allows manual triggering
+        - cron: '*/6 * * * *' # Каждые 6 минут (GitHub позволяет)
+
+    workflow_dispatch:
 
 jobs:
     ping:
         runs-on: ubuntu-latest
 
+        timeout-minutes: 2
+
         steps:
-            - name: Make API request
+            - name: Ping API
+
               run: |
-                  curl -X GET "https://ufc-api-7z3p.onrender.com/api/all-fighters"
+
+                  curl -sSf "https://ufc-api-7z3p.onrender.com" \
+
+                    --max-time 5 \
+
+                    --retry 1 \
+
+                    --write-out "Status: %{http_code}\n"

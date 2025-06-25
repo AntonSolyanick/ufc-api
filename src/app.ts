@@ -6,12 +6,22 @@ import rateLimit from 'express-rate-limit'
 import { filterXSS } from 'xss'
 import hpp from 'hpp'
 import compression from 'compression'
+import cors from 'cors'
 
 import fighterRouter from './routes/fighterRoutes'
 import userRouter from './routes/userRoutes'
 import { Request } from 'express'
 
 const app = express()
+
+app.use(
+    cors({
+        origin: ['http://localhost:3000'],
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+)
 
 app.set('trust proxy', 1) // для корректной работы прокси (Vercel)
 

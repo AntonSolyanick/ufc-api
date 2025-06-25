@@ -10,6 +10,13 @@ export interface ParseOptions {
     maxWaitTime?: number
 }
 
+export const capitalizeFirstLetter = (val: string) => {
+    return (
+        String(val).charAt(0).toUpperCase() +
+        String(val).slice(1).toLocaleLowerCase()
+    )
+}
+
 export const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms))
 

@@ -12,7 +12,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 dotenv_1.default.config();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 (0, helpers_1.connectDB)();
 const server = app_1.default.listen(port, () => {
     console.log(`Server is running on port:${port}`);

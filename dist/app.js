@@ -11,9 +11,16 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const xss_1 = require("xss");
 const hpp_1 = __importDefault(require("hpp"));
 const compression_1 = __importDefault(require("compression"));
+const cors_1 = __importDefault(require("cors"));
 const fighterRoutes_1 = __importDefault(require("./routes/fighterRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)({
+    origin: ['http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.set('trust proxy', 1); // для корректной работы прокси (Vercel)
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: {

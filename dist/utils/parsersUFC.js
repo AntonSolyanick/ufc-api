@@ -101,13 +101,21 @@ const fighterDataParser = async (fighterSlugName) => {
                 if (i === 0)
                     fighterRecord.wins = Math.abs(Number(recordStat));
                 if (i === 1)
-                    fighterRecord.draws = Math.abs(Number(recordStat));
-                if (i === 2)
                     fighterRecord.loses = Math.abs(Number(recordStat));
+                if (i === 2)
+                    fighterRecord.draws = Math.abs(Number(recordStat));
             });
             const nextFightHeadline = nextFightContainer?.querySelector('.c-card-event--athlete-fight__headline');
-            const firstFighterName = nextFightHeadline?.innerText?.split('VS')[0];
-            const secondFighterName = nextFightHeadline?.innerText?.split('VS')[1];
+            // const firstFighterName =
+            //     nextFightHeadline?.innerText?.split('VS')[0]
+            // const secondFighterName =
+            //     nextFightHeadline?.innerText?.split('VS')[1]
+            function capitalizeFirstLetter(val) {
+                return (String(val).charAt(0).toUpperCase() +
+                    String(val).slice(1).toLocaleLowerCase());
+            }
+            let firstFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[0]);
+            let secondFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[1]);
             const fightersSmallImgs = nextFightContainer?.querySelectorAll('.image-style-event-results-athlete-headshot');
             let firstFighterSmallImg = NO_PHOTO_FIGHTER;
             let secondFighterSmallImg = NO_PHOTO_FIGHTER;
@@ -115,6 +123,17 @@ const fighterDataParser = async (fighterSlugName) => {
                 firstFighterSmallImg = fightersSmallImgs[0].getAttribute('src');
                 secondFighterSmallImg =
                     fightersSmallImgs[1].getAttribute('src');
+            }
+            if (fighterRusName?.includes(secondFighterName)) {
+                ;
+                [firstFighterName, secondFighterName] = [
+                    secondFighterName,
+                    firstFighterName,
+                ];
+                [firstFighterSmallImg, secondFighterSmallImg] = [
+                    secondFighterSmallImg,
+                    firstFighterSmallImg,
+                ];
             }
             const fightDate = nextFightContainer?.querySelector('.c-card-event--athlete-fight__date')?.textContent;
             if (!fightDate) {
@@ -149,7 +168,6 @@ const fighterDataParser = async (fighterSlugName) => {
     }
 };
 const populateCollection = async (fighters, parser, Model) => {
-    console.log(fighters[783], fighters[784]);
     try {
         const totalFightersData = [];
         for (let i = 0; i < fighters.length; i++) {
