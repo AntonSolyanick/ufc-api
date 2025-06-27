@@ -14,13 +14,8 @@ jobs:
 
         steps:
             - name: Ping API
-
               run: |
-
                   curl -X GET "https://ufc-api-7z3p.onrender.com" \
-
                     --max-time 5 \
-
                     --retry 1 \
-
                     --write-out "Status: %{http_code}\n"

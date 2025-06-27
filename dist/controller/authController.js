@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.protect = exports.isSignedIn = exports.signOut = exports.signIn = exports.signUp = void 0;
-const email_1 = require("../utils/email");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userModel_1 = __importDefault(require("../model/userModel"));
 const catchAsync_1 = require("../utils/catchAsync");
@@ -41,8 +40,9 @@ const createSendToken = (user, statusCode, res) => {
 };
 exports.signUp = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     const newUser = await userModel_1.default.create(req.body);
-    const url = `${req.protocol}://${req.get('host')}/me`;
-    await new email_1.Email(newUser, url).sendWelcome();
+    //отправка сообщения с подтверждением регистрации
+    // const url = `${req.protocol}://${req.get('host')}/me`
+    // await new Email(newUser, url).sendWelcome()
     createSendToken(newUser, 201, res);
 });
 exports.signIn = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
@@ -56,7 +56,14 @@ exports.signIn = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     createSendToken(user, 200, res);
 });
 exports.signOut = (0, catchAsync_1.catchAsync)(async (req, res) => {
-    res.clearCookie('jwt');
+    const cookieOptionsSignOut = {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+        sameSite: 'none',
+        secure: true,
+        path: '/',
+    };
+    res.clearCookie('jwt', cookieOptionsSignOut);
     res.status(200).json({
         status: 'success',
     });

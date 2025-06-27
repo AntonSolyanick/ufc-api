@@ -1,4 +1,3 @@
-import { Email } from '../utils/email'
 import { Request, Response, NextFunction } from 'express'
 import { Types } from 'mongoose'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
@@ -72,8 +71,9 @@ const createSendToken = (
 
 export const signUp = catchAsync(async (req, res, next) => {
     const newUser = await User.create(req.body)
-    const url = `${req.protocol}://${req.get('host')}/me`
-    await new Email(newUser, url).sendWelcome()
+    //отправка сообщения с подтверждением регистрации
+    // const url = `${req.protocol}://${req.get('host')}/me`
+    // await new Email(newUser, url).sendWelcome()
     createSendToken(newUser, 201, res)
 })
 
@@ -91,7 +91,14 @@ export const signIn = catchAsync(async (req, res, next) => {
 })
 
 export const signOut = catchAsync(async (req: Request, res: Response) => {
-    res.clearCookie('jwt')
+    const cookieOptionsSignOut: CookieOptions = {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+        sameSite: 'none',
+        secure: true,
+        path: '/',
+    }
+    res.clearCookie('jwt', cookieOptionsSignOut)
     res.status(200).json({
         status: 'success',
     })
