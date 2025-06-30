@@ -10,11 +10,23 @@ export interface ParseOptions {
     maxWaitTime?: number
 }
 
-export const capitalizeFirstLetter = (val: string) => {
-    return (
-        String(val).charAt(0).toUpperCase() +
-        String(val).slice(1).toLocaleLowerCase()
-    )
+export async function setEnglishLanguage(page: Page) {
+    const currentLang = await page.evaluate(() => document.documentElement.lang)
+    if (currentLang === 'en') {
+        console.log('Already in English language')
+        return
+    }
+    try {
+        clickButton(page, '.block-ufc-localization-title')
+        clickButton(page, 'ul.links > li:first-child > a:first-child')
+        await page.waitForNavigation({
+            waitUntil: 'networkidle0',
+            timeout: 15000,
+        })
+    } catch (error) {
+        console.error('Error changing language:', error)
+        throw new Error('Failed to set English language')
+    }
 }
 
 export const delay = (ms: number) =>
@@ -72,7 +84,7 @@ export const initializeBrowser = async (
         ignoreHTTPSErrors: true,
         headless: true,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
-        maxWaitTime: 60000,
+        maxWaitTime: 90000,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ...options,
     }
@@ -87,7 +99,11 @@ export const initializeBrowser = async (
         return { browser: null, page: null }
     }
 
-    await page.waitForNavigation()
+    await page.waitForNavigation({
+        waitUntil: 'networkidle0',
+        timeout: 90000,
+    })
+
     return { browser, page }
 }
 

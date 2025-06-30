@@ -46,12 +46,12 @@ exports.signUp = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     createSendToken(newUser, 201, res);
 });
 exports.signIn = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
-    const { email, password } = req.body;
-    if (!email || !password)
-        throw new Error('Введите email и пароль!');
-    const user = await userModel_1.default.findOne({ email }).select('+password');
+    const { login, password } = req.body;
+    if (!login || !password)
+        throw new Error('Введите login и пароль!');
+    const user = await userModel_1.default.findOne({ login }).select('+password');
     if (!user || !(await user.correctPassword(password, user.password))) {
-        throw new Error('Неверный email или пароль!');
+        throw new Error('Неверный login или пароль!');
     }
     createSendToken(user, 200, res);
 });

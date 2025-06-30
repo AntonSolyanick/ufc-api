@@ -6,44 +6,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const slugify_1 = __importDefault(require("slugify"));
 const fighterModel_1 = __importDefault(require("../model/fighterModel"));
-const helpers_1 = require("../utils/helpers");
+const helpers_1 = require("./helpers");
 const config_1 = require("../config");
 dotenv_1.default.config();
-async function setEnglishLanguage(page) {
-    const currentLang = await page.evaluate(() => document.documentElement.lang);
-    if (currentLang === 'en') {
-        console.log('Already in English language');
-        return;
-    }
-    try {
-        (0, helpers_1.clickButton)(page, '.block-ufc-localization-title');
-        (0, helpers_1.clickButton)(page, 'ul.links > li:first-child > a:first-child');
-        await page.waitForNavigation({
-            waitUntil: 'networkidle0',
-            timeout: 15000,
-        });
-    }
-    catch (error) {
-        console.error('Error changing language:', error);
-        throw new Error('Failed to set English language');
-    }
-}
 const namesParser = async (options) => {
-    console.log('Names parsing');
-    console.log(new Date().getTime());
-    console.log(new Date('21.06.25').getTime());
+    console.log('Start names parsing');
     try {
-        const { browser, page } = await (0, helpers_1.initializeBrowser)(config_1.UFC_URL);
+        const { browser, page } = await (0, helpers_1.initializeBrowser)(`${config_1.UFC_URL}${config_1.UFC_URL_PARAMS}`);
         if (!page)
             return;
-        await (0, helpers_1.scrollPageToBottom)(page);
-        await setEnglishLanguage(page);
+        // переключение на английский язык
+        // await scrollPageToBottom(page)
+        // await setEnglishLanguage(page)
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
-        const targetUrl = `${config_1.UFC_URL}${config_1.UFC_URL_PARAMS}`;
-        await page.goto(targetUrl, {
-            waitUntil: 'networkidle2',
-            timeout: 8000,
-        });
+        // const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
+        // await page.goto(targetUrl, {
+        //     waitUntil: 'networkidle2',
+        //     timeout: 60000,
+        // })
         while (await (0, helpers_1.clickButton)(page, '[title="Load more items"]')) {
             await (0, helpers_1.delay)(1000);
         }
@@ -52,6 +32,7 @@ const namesParser = async (options) => {
             const uniqueNames = new Set(names.map((el) => el.textContent?.trim() || ''));
             return Array.from(uniqueNames);
         });
+        console.log('finish names parsing');
         browser.close();
         return parsedNames.map((name) => {
             return { name, slug: (0, slugify_1.default)(name) };
@@ -72,7 +53,6 @@ const fighterDataParser = async (fighterSlugName) => {
         if (!page)
             return;
         const parsedData = await page.evaluate((NO_PHOTO_FIGHTER) => {
-            const nextFightContainer = document.querySelector('.c-card-event--upcoming');
             const fighterImage = document
                 .querySelector('.hero-profile__image')
                 ?.getAttribute('src') || NO_PHOTO_FIGHTER;
@@ -106,7 +86,25 @@ const fighterDataParser = async (fighterSlugName) => {
                 if (i === 2)
                     fighterRecord.draws = Math.abs(Number(recordStat));
             });
+            const nextFightContainer = document.querySelector('.c-card-event--upcoming');
+            if (!nextFightContainer) {
+                return {
+                    fighterImage,
+                    fighterRusName,
+                    fighterRating,
+                    fighterWeightCategory,
+                    fighterRecord,
+                    nextFightInfo: {},
+                };
+            }
             const nextFightHeadline = nextFightContainer?.querySelector('.c-card-event--athlete-fight__headline');
+            // const capitalizeFirstLetter = (val: string) => {
+            //     const newString = val.trim()
+            //     return (
+            //         String(newString).charAt(0).toUpperCase() +
+            //         String(newString).slice(1).toLocaleLowerCase()
+            //     )
+            // }
             let firstFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[0]);
             let secondFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[1]);
             const fightersSmallImgs = nextFightContainer?.querySelectorAll('.image-style-event-results-athlete-headshot');
@@ -129,15 +127,6 @@ const fighterDataParser = async (fighterSlugName) => {
                 ];
             }
             const fightDate = nextFightContainer?.querySelector('.c-card-event--athlete-fight__date')?.textContent;
-            if (!fightDate) {
-                return {
-                    fighterImage,
-                    fighterRusName,
-                    fighterRating,
-                    fighterWeightCategory,
-                    fighterRecord,
-                };
-            }
             return {
                 fighterImage,
                 fighterRusName,
@@ -153,6 +142,7 @@ const fighterDataParser = async (fighterSlugName) => {
                 },
             };
         }, config_1.NO_PHOTO_FIGHTER);
+        console.log(parsedData);
         browser.close();
         return parsedData;
     }

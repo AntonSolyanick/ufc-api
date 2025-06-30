@@ -6,8 +6,9 @@ import bcrypt from 'bcryptjs'
 export interface UserDocument extends mongoose.Document {
     _id: Types.ObjectId
     name: string
+    login: string
     password: string
-    email: string
+    email?: string
     confirmPassword?: string
     passwordChangedAt: Date
     passwordResetToken: string
@@ -26,9 +27,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please, input your name!'],
     },
+    login: {
+        type: String,
+        required: [true, 'Please, input your login!'],
+        unique: true,
+        lowerCase: true,
+    },
     email: {
         type: String,
-        required: [true, 'Please, input your email!'],
+        // required: [true, 'Please, input your email!'],
         unique: true,
         lowerCase: true,
         validate: [validator.isEmail, 'Please input a valid email!'],

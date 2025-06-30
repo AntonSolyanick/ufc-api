@@ -78,13 +78,13 @@ export const signUp = catchAsync(async (req, res, next) => {
 })
 
 export const signIn = catchAsync(async (req, res, next) => {
-    const { email, password } = req.body
+    const { login, password } = req.body
 
-    if (!email || !password) throw new Error('Введите email и пароль!')
+    if (!login || !password) throw new Error('Введите login и пароль!')
 
-    const user = await User.findOne({ email }).select('+password')
+    const user = await User.findOne({ login }).select('+password')
     if (!user || !(await user.correctPassword(password, user.password!))) {
-        throw new Error('Неверный email или пароль!')
+        throw new Error('Неверный login или пароль!')
     }
 
     createSendToken(user, 200, res)

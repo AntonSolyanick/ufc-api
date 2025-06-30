@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer-core'
+// import { Page } from 'puppeteer-core'
 import mongoose, { Model } from 'mongoose'
 import dotenv from 'dotenv'
 import slugify from 'slugify'
@@ -7,13 +7,11 @@ import Fighter, { FighterRecord } from '../model/fighterModel'
 import {
     disconnectDB,
     connectDB,
-    capitalizeFirstLetter,
     initializeBrowser,
     ParseOptions,
-    scrollPageToBottom,
     clickButton,
     delay,
-} from '../utils/helpers'
+} from './helpers'
 
 import {
     UFC_EVENT_URL,
@@ -24,42 +22,26 @@ import {
 
 dotenv.config()
 
-async function setEnglishLanguage(page: Page) {
-    const currentLang = await page.evaluate(() => document.documentElement.lang)
-    if (currentLang === 'en') {
-        console.log('Already in English language')
-        return
-    }
-    try {
-        clickButton(page, '.block-ufc-localization-title')
-        clickButton(page, 'ul.links > li:first-child > a:first-child')
-        await page.waitForNavigation({
-            waitUntil: 'networkidle0',
-            timeout: 15000,
-        })
-    } catch (error) {
-        console.error('Error changing language:', error)
-        throw new Error('Failed to set English language')
-    }
-}
-
 const namesParser = async (options?: ParseOptions) => {
-    console.log('Names parsing')
-    console.log(new Date().getTime())
-    console.log(new Date('21.06.25').getTime())
+    console.log('Start names parsing')
 
     try {
-        const { browser, page } = await initializeBrowser(UFC_URL)
+        const { browser, page } = await initializeBrowser(
+            `${UFC_URL}${UFC_URL_PARAMS}`
+        )
+
         if (!page) return
-        await scrollPageToBottom(page)
-        await setEnglishLanguage(page)
+
+        // переключение на английский язык
+        // await scrollPageToBottom(page)
+        // await setEnglishLanguage(page)
 
         // Добавляем query-параметры после переключения языка для избежание редиректа на домен .ru
-        const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
-        await page.goto(targetUrl, {
-            waitUntil: 'networkidle2',
-            timeout: 8000,
-        })
+        // const targetUrl = `${UFC_URL}${UFC_URL_PARAMS}`
+        // await page.goto(targetUrl, {
+        //     waitUntil: 'networkidle2',
+        //     timeout: 60000,
+        // })
 
         while (await clickButton(page, '[title="Load more items"]')) {
             await delay(1000)
@@ -74,6 +56,9 @@ const namesParser = async (options?: ParseOptions) => {
             )
             return Array.from(uniqueNames)
         })
+
+        console.log('finish names parsing')
+
         browser.close()
         return parsedNames.map((name: string) => {
             return { name, slug: slugify(name) }
@@ -95,10 +80,6 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
         if (!page) return
 
         const parsedData = await page.evaluate((NO_PHOTO_FIGHTER: string) => {
-            const nextFightContainer = document.querySelector(
-                '.c-card-event--upcoming'
-            )
-
             const fighterImage =
                 document
                     .querySelector('.hero-profile__image')
@@ -142,10 +123,33 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                         fighterRecord.draws = Math.abs(Number(recordStat))
                 })
 
+            const nextFightContainer = document.querySelector(
+                '.c-card-event--upcoming'
+            )
+
+            if (!nextFightContainer) {
+                return {
+                    fighterImage,
+                    fighterRusName,
+                    fighterRating,
+                    fighterWeightCategory,
+                    fighterRecord,
+                    nextFightInfo: {},
+                }
+            }
+
             const nextFightHeadline: HTMLElement =
                 nextFightContainer?.querySelector(
                     '.c-card-event--athlete-fight__headline'
                 )!
+
+            const capitalizeFirstLetter = (val: string) => {
+                const newString = val.trim()
+                return (
+                    String(newString).charAt(0).toUpperCase() +
+                    String(newString).slice(1).toLocaleLowerCase()
+                )
+            }
 
             let firstFighterName = capitalizeFirstLetter(
                 nextFightHeadline?.innerText?.split('VS')[0]
@@ -181,16 +185,6 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
             const fightDate = nextFightContainer?.querySelector(
                 '.c-card-event--athlete-fight__date'
             )?.textContent
-
-            if (!fightDate) {
-                return {
-                    fighterImage,
-                    fighterRusName,
-                    fighterRating,
-                    fighterWeightCategory,
-                    fighterRecord,
-                }
-            }
 
             return {
                 fighterImage,
@@ -252,7 +246,7 @@ const populateCollection: Function = async (
 }
 const runParsers = async () => {
     try {
-        console.log('start parsing')
+        await connectDB()
         const parsedNames = await namesParser()
         await populateCollection(parsedNames, fighterDataParser, Fighter)
 
@@ -265,5 +259,4 @@ const runParsers = async () => {
     }
 }
 
-connectDB()
 runParsers()

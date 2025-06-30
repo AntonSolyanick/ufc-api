@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeBrowser = exports.scrollPageToBottom = exports.clickButton = exports.delay = exports.capitalizeFirstLetter = void 0;
+exports.setEnglishLanguage = setEnglishLanguage;
 exports.connectDB = connectDB;
 exports.disconnectDB = disconnectDB;
 const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
@@ -15,6 +16,25 @@ const capitalizeFirstLetter = (val) => {
         String(val).slice(1).toLocaleLowerCase());
 };
 exports.capitalizeFirstLetter = capitalizeFirstLetter;
+async function setEnglishLanguage(page) {
+    const currentLang = await page.evaluate(() => document.documentElement.lang);
+    if (currentLang === 'en') {
+        console.log('Already in English language');
+        return;
+    }
+    try {
+        (0, exports.clickButton)(page, '.block-ufc-localization-title');
+        (0, exports.clickButton)(page, 'ul.links > li:first-child > a:first-child');
+        await page.waitForNavigation({
+            waitUntil: 'networkidle0',
+            timeout: 15000,
+        });
+    }
+    catch (error) {
+        console.error('Error changing language:', error);
+        throw new Error('Failed to set English language');
+    }
+}
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 exports.delay = delay;
 const clickButton = async (page, selector) => {
@@ -56,7 +76,7 @@ exports.scrollPageToBottom = scrollPageToBottom;
 const initializeBrowser = async (url, options) => {
     const config = {
         ignoreHTTPSErrors: true,
-        headless: true,
+        headless: false,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
         maxWaitTime: 60000,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -72,7 +92,10 @@ const initializeBrowser = async (url, options) => {
         await browser.close();
         return { browser: null, page: null };
     }
-    await page.waitForNavigation();
+    await page.waitForNavigation({
+        waitUntil: 'networkidle0',
+        timeout: 60000,
+    });
     return { browser, page };
 };
 exports.initializeBrowser = initializeBrowser;
