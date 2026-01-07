@@ -63,7 +63,8 @@ const fighterDataParser = async (fighterSlugName) => {
             fighterProfileTags.forEach((tag) => {
                 if (fighterRating)
                     return;
-                if (tag.textContent === 'Обладатель титула') {
+                if (tag.textContent?.includes('титул') ||
+                    tag.textContent?.includes('Title')) {
                     fighterRating = 0;
                     return;
                 }
@@ -98,15 +99,13 @@ const fighterDataParser = async (fighterSlugName) => {
                 };
             }
             const nextFightHeadline = nextFightContainer?.querySelector('.c-card-event--athlete-fight__headline');
-            // const capitalizeFirstLetter = (val: string) => {
-            //     const newString = val.trim()
-            //     return (
-            //         String(newString).charAt(0).toUpperCase() +
-            //         String(newString).slice(1).toLocaleLowerCase()
-            //     )
-            // }
-            let firstFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[0]);
-            let secondFighterName = (0, helpers_1.capitalizeFirstLetter)(nextFightHeadline?.innerText?.split('VS')[1]);
+            const capitalizeFirstLetter = (val) => {
+                const newString = val.trim();
+                return (String(newString).charAt(0).toUpperCase() +
+                    String(newString).slice(1).toLocaleLowerCase());
+            };
+            let firstFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[0]);
+            let secondFighterName = capitalizeFirstLetter(nextFightHeadline?.innerText?.split('VS')[1]);
             const fightersSmallImgs = nextFightContainer?.querySelectorAll('.image-style-event-results-athlete-headshot');
             let firstFighterSmallImg = NO_PHOTO_FIGHTER;
             let secondFighterSmallImg = NO_PHOTO_FIGHTER;
@@ -142,7 +141,6 @@ const fighterDataParser = async (fighterSlugName) => {
                 },
             };
         }, config_1.NO_PHOTO_FIGHTER);
-        console.log(parsedData);
         browser.close();
         return parsedData;
     }
@@ -177,7 +175,7 @@ const populateCollection = async (fighters, parser, Model) => {
 };
 const runParsers = async () => {
     try {
-        console.log('start parsing');
+        await (0, helpers_1.connectDB)();
         const parsedNames = await namesParser();
         await populateCollection(parsedNames, fighterDataParser, fighterModel_1.default);
         console.log('parsing compleated');
@@ -189,5 +187,4 @@ const runParsers = async () => {
         process.exit(1);
     }
 };
-(0, helpers_1.connectDB)();
 runParsers();

@@ -5,8 +5,16 @@ const catchAsync_1 = require("../utils/catchAsync");
 const APIFeatures_1 = require("../utils/APIFeatures");
 const getAll = (Model) => (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     let filter = {};
-    if (req.params.fighterRusName)
-        filter = { fighterRusName: req.params.fighterRusName };
+    const filterableFields = [
+        'fighterRusName',
+        'fighterWeightCategory',
+        'country',
+    ];
+    filterableFields.forEach((filterableField) => {
+        if (req.params[filterableField]) {
+            filter[filterableField] = req.params[filterableField];
+        }
+    });
     const features = new APIFeatures_1.APIFeatures(Model.find(filter), req.query)
         .filter()
         .paginate();

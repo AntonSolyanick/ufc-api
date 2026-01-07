@@ -97,7 +97,10 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                 document.querySelectorAll('.hero-profile__tag')
             fighterProfileTags.forEach((tag) => {
                 if (fighterRating) return
-                if (tag.textContent === 'Обладатель титула') {
+                if (
+                    tag.textContent?.includes('титул') ||
+                    tag.textContent?.includes('Title')
+                ) {
                     fighterRating = 0
                     return
                 }

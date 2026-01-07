@@ -12,12 +12,21 @@ class APIFeatures {
         const queryObj = { ...this.queryString };
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach((el) => delete queryObj[el]);
+        const exactMatchFields = ['country', 'fighterWeightCategory'];
         Object.entries(queryObj).forEach(([key, value]) => {
             if (typeof value === 'string') {
-                queryObj[key] = {
-                    $regex: value,
-                    $options: 'i',
-                };
+                if (exactMatchFields.includes(key)) {
+                    queryObj[key] = {
+                        $regex: `^${value}$`,
+                        $options: 'i',
+                    };
+                }
+                else {
+                    queryObj[key] = {
+                        $regex: value,
+                        $options: 'i',
+                    };
+                }
             }
         });
         let queryString = JSON.stringify(queryObj);

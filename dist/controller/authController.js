@@ -48,10 +48,10 @@ exports.signUp = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
 exports.signIn = (0, catchAsync_1.catchAsync)(async (req, res, next) => {
     const { login, password } = req.body;
     if (!login || !password)
-        throw new Error('Введите login и пароль!');
+        throw new Error('Введите логин и пароль!');
     const user = await userModel_1.default.findOne({ login }).select('+password');
     if (!user || !(await user.correctPassword(password, user.password))) {
-        throw new Error('Неверный login или пароль!');
+        throw new Error('Неверный логин или пароль!');
     }
     createSendToken(user, 200, res);
 });

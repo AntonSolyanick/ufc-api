@@ -20,11 +20,20 @@ export class APIFeatures<T extends Document> {
         const excludedFields = ['page', 'sort', 'limit', 'fields']
         excludedFields.forEach((el) => delete queryObj[el])
 
+        const exactMatchFields = ['country', 'fighterWeightCategory']
+
         Object.entries(queryObj).forEach(([key, value]) => {
             if (typeof value === 'string') {
-                queryObj[key] = {
-                    $regex: value,
-                    $options: 'i',
+                if (exactMatchFields.includes(key)) {
+                    queryObj[key] = {
+                        $regex: `^${value}$`,
+                        $options: 'i',
+                    }
+                } else {
+                    queryObj[key] = {
+                        $regex: value,
+                        $options: 'i',
+                    }
                 }
             }
         })

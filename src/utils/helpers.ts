@@ -84,7 +84,7 @@ export const initializeBrowser = async (
         ignoreHTTPSErrors: true,
         headless: true,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
-        maxWaitTime: 90000,
+        maxWaitTime: 120000,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ...options,
     }
@@ -101,7 +101,7 @@ export const initializeBrowser = async (
 
     await page.waitForNavigation({
         waitUntil: 'networkidle0',
-        timeout: 90000,
+        timeout: 120000,
     })
 
     return { browser, page }

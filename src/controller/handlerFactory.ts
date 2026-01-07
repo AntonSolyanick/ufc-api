@@ -5,9 +5,25 @@ import { UserDocument } from '../model/userModel'
 
 export const getAll = <T extends mongoose.Document>(Model: Model<T>) =>
     catchAsync(async (req, res, next) => {
-        let filter = {}
-        if (req.params.fighterRusName)
-            filter = { fighterRusName: req.params.fighterRusName }
+        interface FighterFilter {
+            fighterRusName?: string
+            fighterWeightCategory?: string
+            country?: string
+        }
+
+        let filter: FighterFilter = {}
+        const filterableFields: (keyof FighterFilter)[] = [
+            'fighterRusName',
+            'fighterWeightCategory',
+            'country',
+        ]
+
+        filterableFields.forEach((filterableField) => {
+            if (req.params[filterableField]) {
+                filter[filterableField] = req.params[filterableField]
+            }
+        })
+
         const features = new APIFeatures(Model.find(filter), req.query)
             .filter()
             .paginate()

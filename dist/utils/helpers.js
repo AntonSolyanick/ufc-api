@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initializeBrowser = exports.scrollPageToBottom = exports.clickButton = exports.delay = exports.capitalizeFirstLetter = void 0;
+exports.initializeBrowser = exports.scrollPageToBottom = exports.clickButton = exports.delay = void 0;
 exports.setEnglishLanguage = setEnglishLanguage;
 exports.connectDB = connectDB;
 exports.disconnectDB = disconnectDB;
@@ -11,11 +11,6 @@ const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 dotenv_1.default.config();
-const capitalizeFirstLetter = (val) => {
-    return (String(val).charAt(0).toUpperCase() +
-        String(val).slice(1).toLocaleLowerCase());
-};
-exports.capitalizeFirstLetter = capitalizeFirstLetter;
 async function setEnglishLanguage(page) {
     const currentLang = await page.evaluate(() => document.documentElement.lang);
     if (currentLang === 'en') {
@@ -76,9 +71,9 @@ exports.scrollPageToBottom = scrollPageToBottom;
 const initializeBrowser = async (url, options) => {
     const config = {
         ignoreHTTPSErrors: true,
-        headless: false,
+        headless: true,
         executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
-        maxWaitTime: 60000,
+        maxWaitTime: 120000,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ...options,
     };
@@ -94,7 +89,7 @@ const initializeBrowser = async (url, options) => {
     }
     await page.waitForNavigation({
         waitUntil: 'networkidle0',
-        timeout: 60000,
+        timeout: 120000,
     });
     return { browser, page };
 };
