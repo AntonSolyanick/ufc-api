@@ -32,7 +32,7 @@ const namesParser = async (options) => {
             const uniqueNames = new Set(names.map((el) => el.textContent?.trim() || ''));
             return Array.from(uniqueNames);
         });
-        console.log('finish names parsing');
+        console.log(parsedNames, 'finish names parsing');
         browser.close();
         return parsedNames.map((name) => {
             return { name, slug: (0, slugify_1.default)(name) };
@@ -42,10 +42,7 @@ const namesParser = async (options) => {
         console.error('Something went wrong!', err);
     }
 };
-let fighterNumber = 0;
 const fighterDataParser = async (fighterSlugName) => {
-    console.log('Fighter data parsing', fighterNumber, fighterSlugName);
-    fighterNumber++;
     try {
         if (!fighterSlugName)
             return;
@@ -87,6 +84,12 @@ const fighterDataParser = async (fighterSlugName) => {
                 if (i === 2)
                     fighterRecord.draws = Math.abs(Number(recordStat));
             });
+            const fighterCountryContainer = document.querySelector('.c-bio__field--border-bottom-small-screens');
+            console.log(fighterRusName, fighterCountryContainer);
+            let fighterCountry = fighterCountryContainer?.querySelector('.c-bio__text')?.textContent;
+            if (fighterCountry?.includes(',')) {
+                fighterCountry = fighterCountry.split(',')[1].trim();
+            }
             const nextFightContainer = document.querySelector('.c-card-event--upcoming');
             if (!nextFightContainer) {
                 return {
@@ -95,6 +98,7 @@ const fighterDataParser = async (fighterSlugName) => {
                     fighterRating,
                     fighterWeightCategory,
                     fighterRecord,
+                    fighterCountry: fighterCountry || '',
                     nextFightInfo: {},
                 };
             }
@@ -132,6 +136,7 @@ const fighterDataParser = async (fighterSlugName) => {
                 fighterRating,
                 fighterWeightCategory,
                 fighterRecord,
+                fighterCountry: fighterCountry || '',
                 nextFightInfo: {
                     firstFighterName,
                     secondFighterName,
@@ -141,6 +146,7 @@ const fighterDataParser = async (fighterSlugName) => {
                 },
             };
         }, config_1.NO_PHOTO_FIGHTER);
+        console.log(parsedData);
         browser.close();
         return parsedData;
     }
@@ -152,27 +158,59 @@ const populateCollection = async (fighters, parser, Model) => {
     try {
         const totalFightersData = [];
         for (let i = 0; i < fighters.length; i++) {
-            const additionalIfo = await parser(`${fighters[i].slug}`);
-            totalFightersData.push({ ...fighters[i], ...additionalIfo });
+            const additionalInfo = await parser(`${fighters[i].slug}`);
+            if (additionalInfo) {
+                totalFightersData.push({ ...fighters[i], ...additionalInfo });
+            }
         }
-        const topRatingFighters = totalFightersData
-            .filter((fighter) => fighter.fighterRating)
-            .sort((a, b) => a.fighterRating - b.fighterRating);
-        const lowRatingFighters = totalFightersData.filter((fighter) => !fighter.fighterRating);
-        const sortedFighters = [...topRatingFighters, ...lowRatingFighters];
-        console.log('Populating mongo collection');
-        await Model.bulkWrite(sortedFighters.map((fighter) => ({
+        console.log('Updating mongo collection');
+        // Обновляем или создаем записи
+        const bulkOps = totalFightersData.map((fighter) => ({
             updateOne: {
-                filter: { name: fighter.name },
-                update: { $set: fighter },
-                upsert: true,
+                filter: { fighterRusName: fighter.fighterRusName }, // Ищем по slug
+                update: { $set: fighter }, // Обновляем все поля
+                upsert: true, // Создаем если нет
             },
-        })));
+        }));
+        const result = await Model.bulkWrite(bulkOps);
+        console.log(`Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}, Upserted: ${result.upsertedCount}`);
     }
     catch (err) {
-        console.log(err);
+        console.log('Error in bulkWrite:', err);
     }
 };
+// const populateCollection: Function = async (
+//     fighters: { name: string; slug: string }[],
+//     parser: Function,
+//     Model: Model<mongoose.Document>
+// ) => {
+//     try {
+//         const totalFightersData = []
+//         for (let i = 0; i < fighters.length; i++) {
+//             const additionalIfo = await parser(`${fighters[i].slug}`)
+//             totalFightersData.push({ ...fighters[i], ...additionalIfo })
+//         }
+//         const topRatingFighters = totalFightersData
+//             .filter((fighter) => fighter.fighterRating)
+//             .sort((a, b) => a.fighterRating - b.fighterRating)
+//         const lowRatingFighters = totalFightersData.filter(
+//             (fighter) => !fighter.fighterRating
+//         )
+//         const sortedFighters = [...topRatingFighters, ...lowRatingFighters]
+//         console.log('Populating mongo collection')
+//         await Model.bulkWrite(
+//             sortedFighters.map((fighter) => ({
+//                 updateOne: {
+//                     filter: { name: fighter.name },
+//                     update: { $set: fighter },
+//                     upsert: true,
+//                 },
+//             }))
+//         )
+//     } catch (err) {
+//         console.log(err)
+//     }
+// }
 const runParsers = async () => {
     try {
         await (0, helpers_1.connectDB)();

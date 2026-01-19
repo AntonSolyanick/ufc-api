@@ -57,7 +57,7 @@ const namesParser = async (options?: ParseOptions) => {
             return Array.from(uniqueNames)
         })
 
-        console.log('finish names parsing')
+        console.log(parsedNames, 'finish names parsing')
 
         browser.close()
         return parsedNames.map((name: string) => {
@@ -68,10 +68,7 @@ const namesParser = async (options?: ParseOptions) => {
     }
 }
 
-let fighterNumber = 0
 const fighterDataParser: Function = async (fighterSlugName: string) => {
-    console.log('Fighter data parsing', fighterNumber, fighterSlugName)
-    fighterNumber++
     try {
         if (!fighterSlugName) return
         const { browser, page } = await initializeBrowser(
@@ -126,6 +123,21 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                         fighterRecord.draws = Math.abs(Number(recordStat))
                 })
 
+            const fighterCountryContainer = document.querySelector(
+                '.c-bio__field--border-bottom-small-screens'
+            )
+            console.log(fighterRusName, fighterCountryContainer)
+
+            let fighterCountry =
+                fighterCountryContainer?.querySelector(
+                    '.c-bio__text'
+                )?.textContent
+            if (fighterCountry?.includes(',')) {
+                fighterCountry = fighterCountry.split(',')[1].trim()
+            }
+
+            if (fighterCountry === 'England') fighterCountry = 'Англия'
+
             const nextFightContainer = document.querySelector(
                 '.c-card-event--upcoming'
             )
@@ -137,6 +149,7 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                     fighterRating,
                     fighterWeightCategory,
                     fighterRecord,
+                    fighterCountry: fighterCountry || '',
                     nextFightInfo: {},
                 }
             }
@@ -195,6 +208,7 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                 fighterRating,
                 fighterWeightCategory,
                 fighterRecord,
+                fighterCountry: fighterCountry || '',
                 nextFightInfo: {
                     firstFighterName,
                     secondFighterName,
@@ -204,6 +218,7 @@ const fighterDataParser: Function = async (fighterSlugName: string) => {
                 },
             }
         }, NO_PHOTO_FIGHTER)
+        console.log(parsedData)
 
         browser.close()
         return parsedData
@@ -237,7 +252,7 @@ const populateCollection: Function = async (
         await Model.bulkWrite(
             sortedFighters.map((fighter) => ({
                 updateOne: {
-                    filter: { name: fighter.name },
+                    filter: { slug: fighter.slug },
                     update: { $set: fighter },
                     upsert: true,
                 },

@@ -21,6 +21,7 @@ export interface FighterDocument extends mongoose.Document {
     fighterRating: number
     fighterWeightCategory: string
     fighterRecord: FighterRecord
+    fighterCountry?: string
     nextFightInfo: NextFightInfo
 }
 
@@ -39,6 +40,11 @@ const fighterSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
+    },
+    fighterCountry: {
+        type: String,
+        trim: true,
+        default: '',
     },
     fighterImage: {
         type: String,

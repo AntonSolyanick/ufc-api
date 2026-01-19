@@ -20,6 +20,11 @@ const fighterSchema = new mongoose_1.default.Schema({
         unique: true,
         required: true,
     },
+    fighterCountry: {
+        type: String,
+        trim: true,
+        default: '',
+    },
     fighterImage: {
         type: String,
     },
