@@ -90,6 +90,8 @@ const fighterDataParser = async (fighterSlugName) => {
             if (fighterCountry?.includes(',')) {
                 fighterCountry = fighterCountry.split(',')[1].trim();
             }
+            if (fighterCountry === 'England')
+                fighterCountry = 'Англия';
             const nextFightContainer = document.querySelector('.c-card-event--upcoming');
             if (!nextFightContainer) {
                 return {
@@ -158,59 +160,27 @@ const populateCollection = async (fighters, parser, Model) => {
     try {
         const totalFightersData = [];
         for (let i = 0; i < fighters.length; i++) {
-            const additionalInfo = await parser(`${fighters[i].slug}`);
-            if (additionalInfo) {
-                totalFightersData.push({ ...fighters[i], ...additionalInfo });
-            }
+            const additionalIfo = await parser(`${fighters[i].slug}`);
+            totalFightersData.push({ ...fighters[i], ...additionalIfo });
         }
-        console.log('Updating mongo collection');
-        // Обновляем или создаем записи
-        const bulkOps = totalFightersData.map((fighter) => ({
+        const topRatingFighters = totalFightersData
+            .filter((fighter) => fighter.fighterRating)
+            .sort((a, b) => a.fighterRating - b.fighterRating);
+        const lowRatingFighters = totalFightersData.filter((fighter) => !fighter.fighterRating);
+        const sortedFighters = [...topRatingFighters, ...lowRatingFighters];
+        console.log('Populating mongo collection');
+        await Model.bulkWrite(sortedFighters.map((fighter) => ({
             updateOne: {
-                filter: { fighterRusName: fighter.fighterRusName }, // Ищем по slug
-                update: { $set: fighter }, // Обновляем все поля
-                upsert: true, // Создаем если нет
+                filter: { slug: fighter.slug },
+                update: { $set: fighter },
+                upsert: true,
             },
-        }));
-        const result = await Model.bulkWrite(bulkOps);
-        console.log(`Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}, Upserted: ${result.upsertedCount}`);
+        })));
     }
     catch (err) {
-        console.log('Error in bulkWrite:', err);
+        console.log(err);
     }
 };
-// const populateCollection: Function = async (
-//     fighters: { name: string; slug: string }[],
-//     parser: Function,
-//     Model: Model<mongoose.Document>
-// ) => {
-//     try {
-//         const totalFightersData = []
-//         for (let i = 0; i < fighters.length; i++) {
-//             const additionalIfo = await parser(`${fighters[i].slug}`)
-//             totalFightersData.push({ ...fighters[i], ...additionalIfo })
-//         }
-//         const topRatingFighters = totalFightersData
-//             .filter((fighter) => fighter.fighterRating)
-//             .sort((a, b) => a.fighterRating - b.fighterRating)
-//         const lowRatingFighters = totalFightersData.filter(
-//             (fighter) => !fighter.fighterRating
-//         )
-//         const sortedFighters = [...topRatingFighters, ...lowRatingFighters]
-//         console.log('Populating mongo collection')
-//         await Model.bulkWrite(
-//             sortedFighters.map((fighter) => ({
-//                 updateOne: {
-//                     filter: { name: fighter.name },
-//                     update: { $set: fighter },
-//                     upsert: true,
-//                 },
-//             }))
-//         )
-//     } catch (err) {
-//         console.log(err)
-//     }
-// }
 const runParsers = async () => {
     try {
         await (0, helpers_1.connectDB)();

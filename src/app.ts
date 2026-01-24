@@ -11,6 +11,7 @@ import cors from 'cors'
 import fighterRouter from './routes/fighterRoutes'
 import userRouter from './routes/userRoutes'
 import { Request } from 'express'
+import { globalErrorHandler } from './controller/errorController'
 
 const app = express()
 
@@ -134,5 +135,7 @@ app.use('/', (req, res) => {
         message: 'API работает',
     })
 })
+
+app.use(globalErrorHandler)
 
 export default app

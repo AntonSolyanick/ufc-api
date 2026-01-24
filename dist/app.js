@@ -14,6 +14,7 @@ const compression_1 = __importDefault(require("compression"));
 const cors_1 = __importDefault(require("cors"));
 const fighterRoutes_1 = __importDefault(require("./routes/fighterRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const errorController_1 = require("./controller/errorController");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: [
@@ -114,4 +115,5 @@ app.use('/', (req, res) => {
         message: 'API работает',
     });
 });
+app.use(errorController_1.globalErrorHandler);
 exports.default = app;
